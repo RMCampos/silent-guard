@@ -1,12 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
-@layer utilities {
-  .test-class {
-    background-color: blue !important;
-    color: white !important;
-    padding: 20px !important;
-  }
-}

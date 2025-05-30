@@ -3,21 +3,15 @@ import { Eye, EyeOff, X } from 'lucide-react';
 
 type Props = {
   show: boolean;
-  loginMode: string;
   onClose: () => void;
   onSubmitLogin: () => void;
 }
 
-type LoginForm = {
-  email: string;
-  password: string;
-}
-
-const emptyLoginForm: LoginForm = { email: '', password: '' };
-
 const LoginModal: React.FC<Props> = (props) => {
-  const [loginForm, setLoginForm] = useState<LoginForm>(emptyLoginForm);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loginMode, setLoginMode] = useState<string>('login');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [userPassword, setUserPassword] = useState<string>('');
 
   return props.show
     ? (
@@ -25,7 +19,7 @@ const LoginModal: React.FC<Props> = (props) => {
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {props.loginMode === 'login' ? 'Login' : 'Reset Password'}
+                {loginMode === 'login' ? 'Login' : 'Reset Password'}
               </h2>
               <button 
                 onClick={() => props.onClose()}
@@ -35,21 +29,21 @@ const LoginModal: React.FC<Props> = (props) => {
               </button>
             </div>
 
-            {props.loginMode === 'login' ? (
+            {loginMode === 'login' ? (
               <div className="space-y-4">
                 <input
                   type="email"
                   placeholder="Email"
-                  value={loginForm.email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginForm({...loginForm, email: e.target.value})}
+                  value={userEmail}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
-                    value={loginForm.password}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginForm({...loginForm, password: e.target.value})}
+                    value={userPassword}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserPassword(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                   />
                   <button
@@ -78,12 +72,12 @@ const LoginModal: React.FC<Props> = (props) => {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  value={resetForm.email}
-                  onChange={(e) => setResetForm({...resetForm, email: e.target.value})}
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <button
-                  onClick={handleResetPassword}
+                  onClick={() => console.log('change me')}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
                 >
                   Send Reset Link
