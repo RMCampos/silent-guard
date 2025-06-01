@@ -1,8 +1,9 @@
 import { Edit, LogOut, Plus, Save, Shield, Trash2, User, X } from 'lucide-react';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import type { Message } from '../types/Message';
 import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
+import { getMessages } from '../services/apiService';
 
 type Props = {
   setPageChanged: () => void;
@@ -20,7 +21,7 @@ const DashboardPage: React.FC<Props> = (props) => {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [newMessage, setNewMessage] = useState<Message>(emptyMessage);
   const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
-  const { user, isAuthenticated, logout } = useAuth0();
+  const { user, isAuthenticated, logout, getAccessTokenSilently } = useAuth0();
 
   const handleSaveMessage = () => {
     if (editingMessage) {
@@ -45,11 +46,22 @@ const DashboardPage: React.FC<Props> = (props) => {
     ));
   };
 
+  const getTokenThenCallApi = useCallback(async () => {
+    const token: string = await getAccessTokenSilently({
+      authorizationParams: {
+        scope: 'profile email',
+        audience: 'http://localhost:8080',
+      }
+    });
+    getMessages(token);
+  }, [getAccessTokenSilently]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       props.setPageChanged();
     }
-  }, [isAuthenticated, props]);
+    getTokenThenCallApi();
+  }, [isAuthenticated, props, getTokenThenCallApi]);
 
   return (
     <Fragment>
@@ -250,7 +262,10 @@ const DashboardPage: React.FC<Props> = (props) => {
       </div>
       <AccountModal
         show={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
+        onClose={() => {
+          setShowAccountModal(false);
+          getTokenThenCallApi();
+        }}
         onSubmitAccount={() => {}}
         user={user}
       />

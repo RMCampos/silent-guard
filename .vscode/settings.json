@@ -1,3 +1,8 @@
 {
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "cSpell.words": [
+    "ricardocampos",
+    "silentguardapi"
+  ],
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

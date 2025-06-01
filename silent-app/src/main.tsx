@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { getConfig } from './config.ts';
+import App from './App.tsx';
+import './index.css';
 
 const onRedirectCallback = (appState) => {
   window.history.replaceState(

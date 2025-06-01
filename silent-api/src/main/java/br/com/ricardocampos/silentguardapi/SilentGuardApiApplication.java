@@ -1,4 +1,4 @@
-package br.com.ricardocampos.silent_guard_api;
+package br.com.ricardocampos.silentguardapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

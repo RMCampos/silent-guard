@@ -21,7 +21,8 @@ const App: React.FC = (): React.ReactNode => {
         ?
           <LandingPage onClickLogin={() => loginWithRedirect({
             authorizationParams: {
-              scope: "openid profile email"
+              scope: "openid profile email",
+              audience: "http://localhost:8080"
             }
           })} />
           : <DashboardPage setPageChanged={() => setCurrentPage('landing')} />
