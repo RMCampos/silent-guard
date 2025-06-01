@@ -4,7 +4,6 @@ import { Eye, EyeOff, X } from 'lucide-react';
 type Props = {
   show: boolean;
   onClose: () => void;
-  onSubmitLogin: () => void;
 }
 
 const LoginModal: React.FC<Props> = (props) => {
@@ -55,7 +54,7 @@ const LoginModal: React.FC<Props> = (props) => {
                   </button>
                 </div>
                 <button
-                  onClick={() => props.onSubmitLogin()}
+                  onClick={() => {}}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
                 >
                   Login

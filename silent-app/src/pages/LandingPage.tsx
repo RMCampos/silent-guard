@@ -1,11 +1,12 @@
-import { Clock, Mail, Shield } from 'lucide-react';
 import React from 'react';
+import { Clock, Mail, Shield } from 'lucide-react';
 
 type Props = {
   onClickLogin: () => void;
 }
 
 const LandingPage: React.FC<Props> = (props) => {
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header */}
