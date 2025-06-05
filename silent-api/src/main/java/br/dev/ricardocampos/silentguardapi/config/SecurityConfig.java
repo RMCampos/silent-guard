@@ -1,4 +1,4 @@
-package br.com.ricardocampos.silentguardapi;
+package br.dev.ricardocampos.silentguardapi.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

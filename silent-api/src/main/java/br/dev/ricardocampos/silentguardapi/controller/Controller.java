@@ -1,5 +1,7 @@
-package br.com.ricardocampos.silentguardapi;
+package br.dev.ricardocampos.silentguardapi.controller;
 
+import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
+import br.dev.ricardocampos.silentguardapi.service.AuthService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,20 +27,15 @@ public class Controller {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     Jwt jwt = (Jwt) authentication.getPrincipal();
 
-    Map<String, Object> claims = jwt.getClaims();
-    for (Map.Entry<String, Object> entry : claims.entrySet()) {
-      log.info("claim: {} - value: {}", entry.getKey(), entry.getValue());
-    }
-
     Map<String, String> map = new HashMap<>();
 
-    Optional<String> email = authService.userEmail();
-    if (email.isEmpty()) {
-      log.error("No email found!");
+    Optional<UserInfoDto> userDto = authService.userEmail(jwt.getTokenValue());
+    if (userDto.isEmpty()) {
+      log.error("No user data found!");
       return map;
     }
 
-    map.put("email", email.get());
+    map.put("email", userDto.get().email());
     return map;
   }
 }
