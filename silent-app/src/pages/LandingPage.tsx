@@ -1,11 +1,18 @@
 import React from 'react';
 import { Clock, Mail, Shield } from 'lucide-react';
+import { useAuth0 } from '@auth0/auth0-react';
 
-type Props = {
-  onClickLogin: () => void;
-}
+const LandingPage: React.FC = () => {
+  const { loginWithRedirect } = useAuth0();
 
-const LandingPage: React.FC<Props> = (props) => {
+  const doSignIn = (): void => {
+    loginWithRedirect({
+      authorizationParams: {
+        scope: "openid profile email",
+        audience: "http://localhost:8080"
+      }
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -16,7 +23,7 @@ const LandingPage: React.FC<Props> = (props) => {
           <h1 className="text-2xl font-bold text-white">Silent Guard</h1>
         </div>
         <button 
-          onClick={props.onClickLogin}
+          onClick={doSignIn}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
         >
           Login
@@ -55,7 +62,7 @@ const LandingPage: React.FC<Props> = (props) => {
           </div>
 
           <button 
-            onClick={props.onClickLogin}
+            onClick={doSignIn}
             className="mt-12 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
           >
             Get Started Today

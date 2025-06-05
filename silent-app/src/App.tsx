@@ -7,7 +7,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 const App: React.FC = (): React.ReactNode => {
   const [currentPage, setCurrentPage] = useState<string>('landing');
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-  const { isAuthenticated, loginWithRedirect } = useAuth0();
+  const { isAuthenticated } = useAuth0();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -19,12 +19,7 @@ const App: React.FC = (): React.ReactNode => {
     <div>
       {currentPage === 'landing'
         ?
-          <LandingPage onClickLogin={() => loginWithRedirect({
-            authorizationParams: {
-              scope: "openid profile email",
-              audience: "http://localhost:8080"
-            }
-          })} />
+          <LandingPage />
           : <DashboardPage setPageChanged={() => setCurrentPage('landing')} />
         }
       <LoginModal
