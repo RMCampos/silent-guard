@@ -7,13 +7,28 @@ import { useAuth0 } from '@auth0/auth0-react';
 const App: React.FC = (): React.ReactNode => {
   const [currentPage, setCurrentPage] = useState<string>('landing');
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth0();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     if (isAuthenticated) {
       setCurrentPage('dashboard');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,7 +1,5 @@
 
-export const getMessages = async (token: string) => {
-  console.log('token', token);
-
+export const getMessages = async (token: string | null) => {
   const apiUrl: string = 'http://localhost:8080/api';
 
   const headers = new Headers();

@@ -1,0 +1,49 @@
+---
+
+services:
+  api:
+    container_name: api
+    depends_on:
+      database:
+        condition: service_started
+    environment:
+      AUTH_DOMAIN: ${AUTH_DOMAIN}
+      API_IDENTIFIER: ${API_IDENTIFIER}
+      POSTGRES_DB: sg
+      POSTGRES_HOST: database
+      POSTGRES_USER: sg
+      POSTGRES_PASSWORD: default
+      POSTGRES_PORT: 5432
+      CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:5173
+      MAILGUN_APIKEY: abcdef
+      TARGET_ENV: development
+    ports:
+      - "8585:8585"
+      - "5005:5005"
+    image: maven:3.9.9-eclipse-temurin-21
+    entrypoint: './mvnw -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005" -Dmaven.plugin.validation=VERBOSE'
+    working_dir: /app
+    volumes:
+      - "./silent-api:/app"
+    healthcheck:
+      test: curl -f http://localhost:8080/actuator/health | grep '"status":"UP"'
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 10s
+
+  database:
+    container_name: database
+    image: postgres:15.8-bookworm
+    environment:
+      POSTGRES_DB: sg
+      POSTGRES_USER: sg
+      POSTGRES_PASSWORD: default
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
+      interval: 1m30s
+      timeout: 15s
+      retries: 3
+      start_period: 10s

@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,12 +21,9 @@ public class Controller {
 
   @GetMapping
   public Map<String, String> securedMethod() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    Jwt jwt = (Jwt) authentication.getPrincipal();
-
     Map<String, String> map = new HashMap<>();
 
-    Optional<UserInfoDto> userDto = authService.userEmail(jwt.getTokenValue());
+    Optional<UserInfoDto> userDto = authService.getUserInfo();
     if (userDto.isEmpty()) {
       log.error("No user data found!");
       return map;
