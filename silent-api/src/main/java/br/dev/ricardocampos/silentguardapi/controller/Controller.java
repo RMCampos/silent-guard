@@ -1,13 +1,14 @@
 package br.dev.ricardocampos.silentguardapi.controller;
 
-import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
-import br.dev.ricardocampos.silentguardapi.service.AuthService;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import br.dev.ricardocampos.silentguardapi.dto.MessageDto;
+import br.dev.ricardocampos.silentguardapi.service.MessageService;
+import br.dev.ricardocampos.silentguardapi.service.UserService;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,19 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class Controller {
 
-  private final AuthService authService;
+  private final UserService userService;
 
-  @GetMapping
-  public Map<String, String> securedMethod() {
-    Map<String, String> map = new HashMap<>();
+  private final MessageService messageService;
 
-    Optional<UserInfoDto> userDto = authService.getUserInfo();
-    if (userDto.isEmpty()) {
-      log.error("No user data found!");
-      return map;
-    }
+  @GetMapping("/messages")
+  public ResponseEntity<List<MessageDto>> getMessages() {
+    return ResponseEntity.ok(messageService.getMessages());
+  }
 
-    map.put("email", userDto.get().email());
-    return map;
+  @PostMapping("/user")
+  public ResponseEntity<Void> userSignedUpOrIn() {
+    userService.signUpOrSignUser();
+    return ResponseEntity.noContent().build();
   }
 }

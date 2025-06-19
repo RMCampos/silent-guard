@@ -2,6 +2,9 @@ package br.dev.ricardocampos.silentguardapi.service;
 
 import br.dev.ricardocampos.silentguardapi.auth.BearerTokenHolder;
 import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
+import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
+import br.dev.ricardocampos.silentguardapi.exception.InvalidUserException;
+import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +26,26 @@ public class AuthService {
 
   private final BearerTokenHolder tokenHolder;
   private final String authDomain;
+  private final UserRepository userRepository;
 
   public AuthService(
       @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String authDomain,
-      BearerTokenHolder tokenHolder) {
+      BearerTokenHolder tokenHolder,
+      UserRepository userRepository) {
     this.tokenHolder = tokenHolder;
     this.authDomain = authDomain;
+    this.userRepository = userRepository;
+  }
+
+  public Optional<UserEntity> getUserEntity() {
+    Optional<UserInfoDto> userDto = getUserInfo();
+    if (userDto.isEmpty()
+        || Objects.isNull(userDto.get().email())
+        || userDto.get().email().isBlank()) {
+      throw new InvalidUserException();
+    }
+
+    return userRepository.findByEmail(userDto.get().email());
   }
 
   public Optional<UserInfoDto> getUserInfo() {
@@ -47,6 +64,8 @@ public class AuthService {
               userInfoUrl, HttpMethod.GET, new HttpEntity<>(headers), UserInfoDto.class);
 
       log.info("Finished request to {}", userInfoUrl);
+      log.debug("Response HTTP Status: {}", response.getStatusCode());
+      log.debug("Response Body: {}", response.getBody());
 
       if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
         return getUserInfoAndValidate(response.getBody());
@@ -60,7 +79,7 @@ public class AuthService {
   }
 
   private Optional<UserInfoDto> getUserInfoAndValidate(UserInfoDto userInfoDto) {
-    if (!Objects.isNull(userInfoDto)) {
+    if (Objects.isNull(userInfoDto)) {
       log.info("No user info found!");
       return Optional.empty();
     }

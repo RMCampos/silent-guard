@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS sg_messages (
   id            SERIAL,
   user_id       INTEGER NOT NULL,
   span_days     INTEGER NOT NULL,
+  title         VARCHAR(300) NOT NULL,
   targets       VARCHAR(3000) NOT NULL,
   content       TEXT NOT NULL,
   created_at    TIMESTAMP NOT NULL DEFAULT NOW(),

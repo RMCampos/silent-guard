@@ -1,9 +1,9 @@
 import { Edit, LogOut, Plus, Save, Shield, Trash2, User, X } from 'lucide-react';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import type { Message } from '../types/Message';
 import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
-import { getMessages } from '../services/apiService';
+import { getMessages, signInOrSignUpUser } from '../services/apiService';
 import { useToken } from '../context/TokenContext';
 
 type Props = {
@@ -22,6 +22,7 @@ const DashboardPage: React.FC<Props> = (props) => {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [newMessage, setNewMessage] = useState<Message>(emptyMessage);
   const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
+  const [userValidated, setUserValidated] = useState<boolean>(false);
   const { user, isAuthenticated, logout } = useAuth0();
   const { accessToken } = useToken();
 
@@ -48,12 +49,35 @@ const DashboardPage: React.FC<Props> = (props) => {
     ));
   };
 
+  const validateUser = useCallback(async () => {
+    try {
+      await signInOrSignUpUser(accessToken)
+      setUserValidated(true);
+    }
+    catch (e: unknown) {
+      const err = e as Error;
+      if (err.message === 'Invalid user!') {
+        props.setPageChanged();
+      }
+      else {
+        console.error(err);
+      }
+    }
+  }, [props, accessToken]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       props.setPageChanged();
     }
-    getMessages(accessToken);
-  }, [isAuthenticated, props, accessToken]);
+
+    if (userValidated) {
+      getMessages(accessToken);
+    }
+    else {
+      validateUser();  
+    }
+    
+  }, [isAuthenticated, props, accessToken, userValidated, validateUser]);
 
   return (
     <Fragment>
