@@ -38,6 +38,7 @@ export const getMessages = async (token: string | null) => {
 
   if (response.ok) {
     const json = await response.json();
+    // TODO: create list of recipients manually
     return json;
   }
 
@@ -51,6 +52,7 @@ export const getMessages = async (token: string | null) => {
 };
 
 export const createMessage = async (token: string | null, payload: Message) => {
+  // TODO: create list of recipients manually
   const response = await fetch(`${apiUrl}/messages`, {
     method: 'PUT',
     mode: 'cors',
@@ -73,6 +75,7 @@ export const createMessage = async (token: string | null, payload: Message) => {
 }
 
 export const updateMessage = async (token: string | null, payload: Message) => {
+  // TODO: create list of recipients manually
   const response = await fetch(`${apiUrl}/messages/${payload.id}`, {
     method: 'POST',
     mode: 'cors',
@@ -97,3 +100,23 @@ export const updateMessage = async (token: string | null, payload: Message) => {
 
   throw new Error('Something went wrong!');
 };
+
+export const deleteMessage = async (token: string | null, id: number) => {
+  const response = await fetch(`${apiUrl}/messages/${id}`, {
+    method: 'DELETE',
+    mode: 'cors',
+    headers: getHeaders(token)
+  });
+
+  if (response.status === 204) {
+    return;
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
+
+  throw new Error('Something went wrong!');
+}

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class MessageService {
     log.info("Getting all messages for user {}", user.get().getId());
 
     List<MessageEntity> messageList = messageRepository.findAllByUserId(user.get().getId());
-    log.info("{} message(s) found.");
+    log.info("{} message(s) found.", messageList.size());
 
     return messageList.stream().map(MessageDto::fromEntity).toList();
   }
@@ -44,10 +45,12 @@ public class MessageService {
     Optional<UserEntity> user = getUserEntity();
     log.info("Creating message for user {}", user.get().getId());
 
+    String targets =
+        messageDto.recipients().stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity message = new MessageEntity();
     message.setUserId(user.get().getId());
     message.setTitle(messageDto.title());
-    message.setTargets(messageDto.recipient());
+    message.setTargets(targets);
     message.setContent(messageDto.content());
     message.setSpanDays(messageDto.daysToTrigger());
     message.setCreatedAt(LocalDateTime.now());
@@ -68,9 +71,11 @@ public class MessageService {
       throw new MessageNotFoundException();
     }
 
+    String targets =
+        messageDto.recipients().stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity messageFromDb = messageOptional.get();
     messageFromDb.setTitle(messageDto.title());
-    messageFromDb.setTargets(messageDto.recipient());
+    messageFromDb.setTargets(targets);
     messageFromDb.setContent(messageDto.content());
     messageFromDb.setSpanDays(messageDto.daysToTrigger());
     messageFromDb.setUpdatedAt(LocalDateTime.now());
@@ -88,6 +93,23 @@ public class MessageService {
       log.info("Disabling schedule engine for message id {}", id);
       // stop scheduled tasks
     }
+  }
+
+  public void deleteMessage(Long id) {
+    Optional<UserEntity> user = getUserEntity();
+    log.info("Deleting message for user {}", user.get().getId());
+
+    Optional<MessageEntity> messageOptional = messageRepository.findById(id);
+    if (messageOptional.isEmpty()) {
+      throw new MessageNotFoundException();
+    }
+
+    messageRepository.delete(messageOptional.get());
+
+    log.info("Message updated for user {}", user.get().getId());
+
+    log.info("Disabling schedule engine for message id {}", id);
+    // stop scheduled tasks
   }
 
   private Optional<UserEntity> getUserEntity() {

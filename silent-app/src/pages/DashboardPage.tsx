@@ -3,14 +3,14 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import type { Message } from '../types/Message';
 import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
-import { createMessage, getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
+import { createMessage, deleteMessage, getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
 import { useToken } from '../context/TokenContext';
 
 type Props = {
   setPageChanged: () => void;
 };
 
-const emptyMessage: Message = { id: 0, title: '', content: '', daysToTrigger: 30, recipient: '', active: true };
+const emptyMessage: Message = { id: 0, title: '', content: '', daysToTrigger: 30, recipients: '', active: true };
 
 const DashboardPage: React.FC<Props> = (props) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,9 +46,22 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   };
 
-  const handleDeleteMessage = (id: number) => {
+  const handleDeleteMessage = async (id: number) => {
     if (confirm('Are you sure you want to delete this message?')) {
-      setMessages(messages.filter(msg => msg.id !== id));
+      const messageToDelete = messages.filter(msg => msg.id === id);
+
+      if (messageToDelete.length > 0) {
+        try {
+          await deleteMessage(accessToken, messageToDelete[0].id);
+          setEditingMessage(null);
+          fetchAllMessages();
+        }
+        catch (e: unknown) {
+          const error = e as Error;
+          console.error(error);
+          // TODO: handle error nicely
+        }
+      }
     }
   };
 
@@ -66,12 +79,11 @@ const DashboardPage: React.FC<Props> = (props) => {
   };
 
   const toggleMessageStatus = async (id: number) => {
-    const messageToActivate = messages.map(msg => 
-      msg.id === id ? { ...msg, active: !msg.active } : msg
-    );
+    const messageToActivate = messages.filter(msg => msg.id === id);
 
     if (messageToActivate.length > 0) {
       try {
+        messageToActivate[0].active = !messageToActivate[0];
         await updateMessage(accessToken, messageToActivate[0]);
         setEditingMessage(null);
         fetchAllMessages();
@@ -163,8 +175,8 @@ const DashboardPage: React.FC<Props> = (props) => {
               <input
                 type="email"
                 placeholder="Recipient email"
-                value={newMessage.recipient}
-                onChange={(e) => setNewMessage({...newMessage, recipient: e.target.value})}
+                value={newMessage.recipients}
+                onChange={(e) => setNewMessage({...newMessage, recipients: e.target.value})}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -191,7 +203,7 @@ const DashboardPage: React.FC<Props> = (props) => {
               </div>
               <button
                 onClick={handleSaveMessage}
-                disabled={!newMessage.title || !newMessage.content || !newMessage.recipient}
+                disabled={!newMessage.title || !newMessage.content || !newMessage.recipients}
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -214,8 +226,8 @@ const DashboardPage: React.FC<Props> = (props) => {
                     />
                     <input
                       type="email"
-                      value={editingMessage.recipient}
-                      onChange={(e) => setEditingMessage({...editingMessage, recipient: e.target.value})}
+                      value={editingMessage.recipients}
+                      onChange={(e) => setEditingMessage({...editingMessage, recipients: e.target.value})}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <textarea
@@ -259,7 +271,7 @@ const DashboardPage: React.FC<Props> = (props) => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900">{message.title}</h3>
-                        <p className="text-sm text-gray-600">To: {message.recipient}</p>
+                        <p className="text-sm text-gray-600">To: {message.recipients}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${

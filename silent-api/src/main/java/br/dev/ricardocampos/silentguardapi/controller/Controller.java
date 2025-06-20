@@ -3,10 +3,13 @@ package br.dev.ricardocampos.silentguardapi.controller;
 import br.dev.ricardocampos.silentguardapi.dto.MessageDto;
 import br.dev.ricardocampos.silentguardapi.service.MessageService;
 import br.dev.ricardocampos.silentguardapi.service.UserService;
+import jakarta.validation.Valid;
+
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +34,7 @@ public class Controller {
   }
 
   @PutMapping("/messages")
-  public ResponseEntity<MessageDto> createMessage(@RequestBody MessageDto messageDto) {
+  public ResponseEntity<MessageDto> createMessage(@Valid @RequestBody MessageDto messageDto) {
     return ResponseEntity.ok(messageService.createMessage(messageDto));
   }
 
@@ -39,6 +42,12 @@ public class Controller {
   public ResponseEntity<Void> updateMessage(
       @RequestBody MessageDto messageDto, @PathVariable("id") Long id) {
     messageService.updateMessage(id, messageDto);
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping("/messages/{id}")
+  public ResponseEntity<Void> deleteMessage(@PathVariable("id") Long id) {
+    messageService.deleteMessage(id);
     return ResponseEntity.noContent().build();
   }
 
