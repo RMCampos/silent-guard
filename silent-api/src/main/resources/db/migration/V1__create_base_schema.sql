@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS sg_users (
   id            SERIAL,
-  email         VARCHAR(50) NOT NULL,
+  email         VARCHAR(50) NOT NULL UNIQUE,
   last_check_in TIMESTAMP NOT NULL,
   break_days    INTEGER NULL DEFAULT NULL,
   created_at    TIMESTAMP NOT NULL DEFAULT NOW(),

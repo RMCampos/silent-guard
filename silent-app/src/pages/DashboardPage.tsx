@@ -3,7 +3,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import type { Message } from '../types/Message';
 import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
-import { getMessages, signInOrSignUpUser } from '../services/apiService';
+import { getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
 import { useToken } from '../context/TokenContext';
 
 type Props = {
@@ -26,10 +26,22 @@ const DashboardPage: React.FC<Props> = (props) => {
   const { user, isAuthenticated, logout } = useAuth0();
   const { accessToken } = useToken();
 
-  const handleSaveMessage = () => {
+  const saveEdit = async (message: Message): Promise<void> => {
+    try {
+      updateMessage(accessToken, message);
+    }
+    catch (e: unknown) {
+      const error = e as Error;
+      console.error(error);
+      // TODO: handle error nicely
+    }
+  };
+
+  const handleSaveMessage = async () => {
     if (editingMessage) {
-      setMessages(messages.map(msg => msg.id === editingMessage.id ? editingMessage : msg));
+      await saveEdit(editingMessage);
       setEditingMessage(null);
+      // reload/get all messages
     } else {
       const newMsg = { ...newMessage, id: Date.now() };
       setMessages([...messages, newMsg]);

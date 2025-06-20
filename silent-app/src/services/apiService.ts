@@ -1,3 +1,5 @@
+import type { Message } from "../types/Message";
+
 const apiUrl: string = import.meta.env.VITE_BACKEND_API ?? '';
 
 const getHeaders = (token: string | null): Headers => {
@@ -36,6 +38,36 @@ export const getMessages = async (token: string | null) => {
 
   if (response.ok) {
     const json = await response.json();
-    console.log('json', json);
+    return json;
   }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
+
+  throw new Error('Something went wrong!');
+};
+
+export const updateMessage = async (token: string | null, payload: Message) => {
+  const response = await fetch(`${apiUrl}/messages`, {
+    method: 'PUT',
+    mode: 'cors',
+    headers: getHeaders(token),
+    body: JSON.stringify(payload)
+  });
+
+  if (response.ok) {
+    const json = await response.json();
+    return json;
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
+
+  throw new Error('Something went wrong!');
 };
