@@ -31,7 +31,7 @@ public class UserService {
       throw new InvalidUserException();
     }
 
-    log.info("Registering user {}", userDto.get().email());
+    log.info("Checking signUp or SignIn for user {}", userDto.get().email());
 
     Optional<UserEntity> userOptional = userRepository.findByEmail(userDto.get().email());
     if (userOptional.isEmpty()) {
