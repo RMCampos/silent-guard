@@ -2,7 +2,8 @@
   "java.compile.nullAnalysis.mode": "automatic",
   "cSpell.words": [
     "ricardocampos",
-    "silentguardapi"
+    "silentguardapi",
+    "userinfo"
   ],
   "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -1,5 +1,6 @@
 package br.dev.ricardocampos.silentguardapi.service;
 
+import br.dev.ricardocampos.silentguardapi.auth.BearerTokenHolder;
 import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
 import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
 import br.dev.ricardocampos.silentguardapi.exception.InvalidUserException;
@@ -20,8 +21,10 @@ public class UserService {
 
   private final AuthService authService;
 
+  private final BearerTokenHolder bearerTokenHolder;
+
   public void signUpOrSignUser() {
-    Optional<UserInfoDto> userDto = authService.getUserInfo();
+    Optional<UserInfoDto> userDto = authService.getUserInfo(bearerTokenHolder.getToken());
     if (userDto.isEmpty()
         || Objects.isNull(userDto.get().email())
         || userDto.get().email().isBlank()) {

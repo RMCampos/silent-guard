@@ -1,14 +1,11 @@
 package br.dev.ricardocampos.silentguardapi.service;
 
-import br.dev.ricardocampos.silentguardapi.auth.BearerTokenHolder;
+import br.dev.ricardocampos.silentguardapi.config.AppConfig;
 import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
-import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
-import br.dev.ricardocampos.silentguardapi.exception.InvalidUserException;
-import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,35 +21,25 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class AuthService {
 
-  private final BearerTokenHolder tokenHolder;
-  private final String authDomain;
-  private final UserRepository userRepository;
+  private final AppConfig appConfig;
 
-  public AuthService(
-      @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String authDomain,
-      BearerTokenHolder tokenHolder,
-      UserRepository userRepository) {
-    this.tokenHolder = tokenHolder;
-    this.authDomain = authDomain;
-    this.userRepository = userRepository;
+  public AuthService(AppConfig appConfig) {
+    this.appConfig = appConfig;
   }
 
-  public Optional<UserEntity> getUserEntity() {
-    Optional<UserInfoDto> userDto = getUserInfo();
-    if (userDto.isEmpty()
-        || Objects.isNull(userDto.get().email())
-        || userDto.get().email().isBlank()) {
-      throw new InvalidUserException();
-    }
+  @Cacheable(value = "userInfoDto", key = "#token")
+  public Optional<UserInfoDto> getUserInfo(String token) {
+    log.info(
+        "Token length: {}, Hash: {}, Ends with: {}",
+        token.length(),
+        token.hashCode(),
+        token.substring(token.length()-20));
 
-    return userRepository.findByEmail(userDto.get().email());
-  }
-
-  public Optional<UserInfoDto> getUserInfo() {
-    String userInfoUrl = String.format("%s/userinfo", authDomain);
+    log.info("No cached version for the token, fetching from Auth0");
+    String userInfoUrl = String.format("%s/userinfo", appConfig.getAuthDomain());
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", "Bearer " + tokenHolder.getToken());
+    headers.set("Authorization", "Bearer " + token);
 
     RestTemplate restTemplate = new RestTemplate();
 

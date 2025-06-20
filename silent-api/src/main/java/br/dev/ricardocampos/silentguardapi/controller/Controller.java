@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,8 +31,14 @@ public class Controller {
   }
 
   @PutMapping("/messages")
-  public ResponseEntity<Void> updateMessage(@RequestBody MessageDto messageDto) {
-    messageService.updateMessage(messageDto);
+  public ResponseEntity<MessageDto> createMessage(@RequestBody MessageDto messageDto) {
+    return ResponseEntity.ok(messageService.createMessage(messageDto));
+  }
+
+  @PostMapping("/messages/{id}")
+  public ResponseEntity<Void> updateMessage(
+      @RequestBody MessageDto messageDto, @PathVariable("id") Long id) {
+    messageService.updateMessage(id, messageDto);
     return ResponseEntity.noContent().build();
   }
 

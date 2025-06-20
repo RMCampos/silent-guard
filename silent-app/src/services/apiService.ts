@@ -50,7 +50,7 @@ export const getMessages = async (token: string | null) => {
   throw new Error('Something went wrong!');
 };
 
-export const updateMessage = async (token: string | null, payload: Message) => {
+export const createMessage = async (token: string | null, payload: Message) => {
   const response = await fetch(`${apiUrl}/messages`, {
     method: 'PUT',
     mode: 'cors',
@@ -61,6 +61,32 @@ export const updateMessage = async (token: string | null, payload: Message) => {
   if (response.ok) {
     const json = await response.json();
     return json;
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
+
+  throw new Error('Something went wrong!');
+}
+
+export const updateMessage = async (token: string | null, payload: Message) => {
+  const response = await fetch(`${apiUrl}/messages/${payload.id}`, {
+    method: 'POST',
+    mode: 'cors',
+    headers: getHeaders(token),
+    body: JSON.stringify(payload)
+  });
+
+  if (response.ok && response.status === 200) {
+    const json = await response.json();
+    return json;
+  }
+
+  if (response.status === 204) {
+    return;
   }
 
   const contentType = response.headers.get('content-type');

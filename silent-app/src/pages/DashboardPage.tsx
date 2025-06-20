@@ -3,22 +3,17 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import type { Message } from '../types/Message';
 import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
-import { getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
+import { createMessage, getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
 import { useToken } from '../context/TokenContext';
 
 type Props = {
   setPageChanged: () => void;
 };
 
-const emptyMessage: Message = { id: 0, title: '', content: '', days: 30, recipient: '', active: true };
-
-const messagesMock: Message[] = [
-  { id: 1, title: 'Emergency Contact', content: 'Important information for my family...', days: 30, recipient: 'family@example.com', active: true },
-  { id: 2, title: 'Business Handover', content: 'Access credentials and procedures...', days: 7, recipient: 'partner@company.com', active: false }
-];
+const emptyMessage: Message = { id: 0, title: '', content: '', daysToTrigger: 30, recipient: '', active: true };
 
 const DashboardPage: React.FC<Props> = (props) => {
-  const [messages, setMessages] = useState<Message[]>(messagesMock);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [newMessage, setNewMessage] = useState<Message>(emptyMessage);
   const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
@@ -26,26 +21,28 @@ const DashboardPage: React.FC<Props> = (props) => {
   const { user, isAuthenticated, logout } = useAuth0();
   const { accessToken } = useToken();
 
-  const saveEdit = async (message: Message): Promise<void> => {
-    try {
-      updateMessage(accessToken, message);
-    }
-    catch (e: unknown) {
-      const error = e as Error;
-      console.error(error);
-      // TODO: handle error nicely
-    }
-  };
-
   const handleSaveMessage = async () => {
     if (editingMessage) {
-      await saveEdit(editingMessage);
-      setEditingMessage(null);
-      // reload/get all messages
+      try {
+        await updateMessage(accessToken, editingMessage);
+        setEditingMessage(null);
+        fetchAllMessages();
+      }
+      catch (e: unknown) {
+        const error = e as Error;
+        console.error(error);
+        // TODO: handle error nicely
+      }
     } else {
-      const newMsg = { ...newMessage, id: Date.now() };
-      setMessages([...messages, newMsg]);
-      // setNewMessage({ title: '', content: '', days: 30, recipient: '', active: true });
+      try {
+        await createMessage(accessToken, newMessage);
+        fetchAllMessages();
+      }
+      catch (e: unknown) {
+        const error = e as Error;
+        console.error(error);
+        // TODO: handle error nicely
+      }
     }
   };
 
@@ -55,16 +52,43 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   };
 
-  const toggleMessageStatus = (id: number) => {
-    setMessages(messages.map(msg => 
+  const fetchAllMessages = async () => {
+    if (userValidated) {
+      try {
+        const messagesFetched: Message[] = await getMessages(accessToken);
+        setMessages(messagesFetched);
+      } catch (e: unknown) {
+        const error = e as Error;
+        console.error(error);
+        // TODO: handle error nicely
+      }
+    }
+  };
+
+  const toggleMessageStatus = async (id: number) => {
+    const messageToActivate = messages.map(msg => 
       msg.id === id ? { ...msg, active: !msg.active } : msg
-    ));
+    );
+
+    if (messageToActivate.length > 0) {
+      try {
+        await updateMessage(accessToken, messageToActivate[0]);
+        setEditingMessage(null);
+        fetchAllMessages();
+      }
+      catch (e: unknown) {
+        const error = e as Error;
+        console.error(error);
+        // TODO: handle error nicely
+      }
+    }
   };
 
   const validateUser = useCallback(async () => {
     try {
       await signInOrSignUpUser(accessToken)
       setUserValidated(true);
+      
     }
     catch (e: unknown) {
       const err = e as Error;
@@ -82,13 +106,11 @@ const DashboardPage: React.FC<Props> = (props) => {
       props.setPageChanged();
     }
 
-    if (userValidated) {
-      getMessages(accessToken);
-    }
-    else {
+    if (!userValidated) { 
       validateUser();  
     }
-    
+
+    fetchAllMessages();
   }, [isAuthenticated, props, accessToken, userValidated, validateUser]);
 
   return (
@@ -157,13 +179,13 @@ const DashboardPage: React.FC<Props> = (props) => {
             </div>
             <div className="mt-4 flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Days until trigger:</label>
+                <label className="text-sm font-medium text-gray-700">Trigger every (days):</label>
                 <input
                   type="number"
                   min="1"
                   max="365"
-                  value={newMessage.days}
-                  onChange={(e) => setNewMessage({...newMessage, days: parseInt(e.target.value)})}
+                  value={newMessage.daysToTrigger}
+                  onChange={(e) => setNewMessage({...newMessage, daysToTrigger: parseInt(e.target.value)})}
                   className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -209,8 +231,8 @@ const DashboardPage: React.FC<Props> = (props) => {
                           type="number"
                           min="1"
                           max="365"
-                          value={editingMessage.days}
-                          onChange={(e) => setEditingMessage({...editingMessage, days: parseInt(e.target.value)})}
+                          value={editingMessage.daysToTrigger}
+                          onChange={(e) => setEditingMessage({...editingMessage, daysToTrigger: parseInt(e.target.value)})}
                           className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
@@ -252,7 +274,7 @@ const DashboardPage: React.FC<Props> = (props) => {
                     <p className="text-gray-700 mb-4">{message.content}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
-                        Trigger in {message.days} days
+                        Trigger every {message.daysToTrigger} day(s)
                       </span>
                       <div className="flex space-x-2">
                         <button
