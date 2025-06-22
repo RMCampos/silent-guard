@@ -15,8 +15,9 @@ services:
       POSTGRES_PASSWORD: default
       POSTGRES_PORT: 5432
       CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:5173
-      MAILGUN_APIKEY: abcdef
+      MAILGUN_APIKEY: ${MAILGUN_APIKEY}
       TARGET_ENV: development
+      API_LOGGING_LEVEL: INFO
     ports:
       - "8080:8080"
       - "5005:5005"

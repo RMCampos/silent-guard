@@ -9,10 +9,13 @@ import br.dev.ricardocampos.silentguardapi.exception.InvalidUserException;
 import br.dev.ricardocampos.silentguardapi.exception.MessageNotFoundException;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
 import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
+import br.dev.ricardocampos.silentguardapi.util.UuidUtil;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,8 @@ public class MessageService {
 
   private final BearerTokenHolder bearerTokenHolder;
 
+  private final PersistentReminderService persistentReminderService;
+
   public List<MessageDto> getMessages() {
     Optional<UserEntity> user = getUserEntity();
     log.info("Getting all messages for user {}", user.get().getId());
@@ -45,8 +50,10 @@ public class MessageService {
     Optional<UserEntity> user = getUserEntity();
     log.info("Creating message for user {}", user.get().getId());
 
-    String targets =
-        messageDto.recipients().stream().map(String::trim).collect(Collectors.joining(";"));
+    Set<String> uniqueEmails = new HashSet<>();
+    uniqueEmails.addAll(messageDto.recipients());
+
+    String targets = uniqueEmails.stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity message = new MessageEntity();
     message.setUserId(user.get().getId());
     message.setTitle(messageDto.title());
@@ -54,8 +61,12 @@ public class MessageService {
     message.setContent(messageDto.content());
     message.setSpanDays(messageDto.daysToTrigger());
     message.setCreatedAt(LocalDateTime.now());
+    message.setLastReminderSent(null);
+    message.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.daysToTrigger()));
+    message.setReminderUuid(new UuidUtil().generateRecipientUuid(targets));
 
     messageRepository.save(message);
+    persistentReminderService.scheduleCheckingMessage(message);
 
     log.info("Message created for user {}", user.get().getId());
 
@@ -105,6 +116,7 @@ public class MessageService {
     }
 
     messageRepository.delete(messageOptional.get());
+    persistentReminderService.cancelExistingTask(id);
 
     log.info("Message updated for user {}", user.get().getId());
 

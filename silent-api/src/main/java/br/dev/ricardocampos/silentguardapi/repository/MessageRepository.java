@@ -7,4 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
   List<MessageEntity> findAllByUserId(Long userId);
+
+  List<MessageEntity> findAllByIdIn(List<Long> idList);
+
+  List<MessageEntity> findByDisabledAtNull();
 }

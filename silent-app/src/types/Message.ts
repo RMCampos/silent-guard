@@ -3,6 +3,6 @@ export type Message = {
   title: string;
   content: string;
   daysToTrigger: number;
-  recipients: string;
+  recipients: string[];
   active: boolean
 };

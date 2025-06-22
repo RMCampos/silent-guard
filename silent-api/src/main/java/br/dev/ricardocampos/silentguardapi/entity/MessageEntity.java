@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
@@ -32,6 +33,18 @@ public class MessageEntity {
 
   @Column(columnDefinition = "TEXT")
   private String content;
+
+  @Column(name = "last_reminder_sent")
+  private LocalDateTime lastReminderSent;
+
+  @Column(name = "next_reminder_due", nullable = false)
+  private LocalDateTime nextReminderDue;
+
+  @Column(name = "last_check_in")
+  private LocalDateTime lastCheckIn;
+
+  @Column(name = "reminder_uuid", columnDefinition = "uuid", nullable = false, unique = true)
+  private UUID reminderUuid;
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;

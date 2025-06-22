@@ -36,7 +36,7 @@ public class AuthService {
         token.substring(token.length()-20));
 
     log.info("No cached version for the token, fetching from Auth0");
-    String userInfoUrl = String.format("%s/userinfo", appConfig.getAuthDomain());
+    String userInfoUrl = String.format("%s/userinfo", appConfig.getAuthZeroAuthDomain());
 
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", "Bearer " + token);

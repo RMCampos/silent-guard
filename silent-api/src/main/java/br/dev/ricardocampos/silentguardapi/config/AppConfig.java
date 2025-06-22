@@ -1,19 +1,29 @@
 package br.dev.ricardocampos.silentguardapi.config;
 
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+@Getter
+@ToString
 @Component
+@ConfigurationProperties(prefix = "br.dev.ricardocampos.silentguardapi")
 public class AppConfig {
 
-  private final String authDomain;
+  @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+  private String authZeroAuthDomain;
 
-  public AppConfig(
-      @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String authDomain) {
-    this.authDomain = authDomain;
-  }
+  @Value("${br.dev.ricardocampos.silentguardapi.target-env}")
+  private String targetEnv;
 
-  public String getAuthDomain() {
-    return authDomain;
-  }
+  @Value("${br.dev.ricardocampos.silentguardapi.mailgun.api-key}")
+  private String mailgunApiKey;
+
+  @Value("${br.dev.ricardocampos.silentguardapi.mailgun.domain}")
+  private String mailgunDomain;
+
+  @Value("${br.dev.ricardocampos.silentguardapi.mailgun.sender-email}")
+  private String mailgunSender;
 }

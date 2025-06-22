@@ -52,7 +52,6 @@ export const getMessages = async (token: string | null) => {
 };
 
 export const createMessage = async (token: string | null, payload: Message) => {
-  // TODO: create list of recipients manually
   const response = await fetch(`${apiUrl}/messages`, {
     method: 'PUT',
     mode: 'cors',
@@ -75,7 +74,6 @@ export const createMessage = async (token: string | null, payload: Message) => {
 }
 
 export const updateMessage = async (token: string | null, payload: Message) => {
-  // TODO: create list of recipients manually
   const response = await fetch(`${apiUrl}/messages/${payload.id}`, {
     method: 'POST',
     mode: 'cors',

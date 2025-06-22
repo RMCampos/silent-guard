@@ -12,8 +12,7 @@ import java.util.Objects;
 public record MessageDto(
     Long id,
     @NotNull String title,
-    @NotEmpty(message = "At least one recipient is required") @Valid
-        List<@Email(message = "Invalid email format") String> recipients,
+    @NotEmpty(message = "At least one recipient is required") @Valid List<@Email String> recipients,
     @NotNull String content,
     @NotNull Integer daysToTrigger,
     Boolean active) {
