@@ -26,7 +26,7 @@ public class MessageEntity {
   private Integer spanDays;
 
   @Column(nullable = false, length = 300)
-  private String title;
+  private String subject;
 
   @Column(nullable = false, length = 3000)
   private String targets;

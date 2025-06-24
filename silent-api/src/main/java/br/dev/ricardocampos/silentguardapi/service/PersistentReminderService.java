@@ -2,6 +2,7 @@ package br.dev.ricardocampos.silentguardapi.service;
 
 import br.dev.ricardocampos.silentguardapi.entity.MessageEntity;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
+import br.dev.ricardocampos.silentguardapi.util.FormatUtil;
 import io.jsonwebtoken.lang.Arrays;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
@@ -67,7 +68,7 @@ public class PersistentReminderService {
     log.info(
         "Scheduling check-in message {} to be sent in {}, then repeat after {} days",
         message.getId(),
-        formatDuration(initialDelay),
+        FormatUtil.formatDuration(initialDelay),
         message.getSpanDays());
 
     ScheduledFuture<?> future =
@@ -116,7 +117,7 @@ public class PersistentReminderService {
     log.info(
         "Scheduling content message id {} to be sent in {}, if not cancelled",
         message.getId(),
-        formatDuration(initialDelay),
+        FormatUtil.formatDuration(initialDelay),
         message.getSpanDays());
 
     ScheduledFuture<?> future =
@@ -152,7 +153,7 @@ public class PersistentReminderService {
 
       List<String> recipients = Arrays.asList(messageOpt.getTargets().split(";"));
       mailgunEmailService.sendHtmlContentMessage(
-          recipients, messageOpt.getTitle(), messageOpt.getContent());
+          recipients, messageOpt.getSubject(), messageOpt.getContent());
 
       // Update database disabling the current message
       messageRepository
@@ -190,27 +191,6 @@ public class PersistentReminderService {
     } else {
       log.debug("No existing task found for message {} to cancel", messageId);
     }
-  }
-
-  private String formatDuration(Duration duration) {
-    if (duration == null) {
-      return "0 seconds";
-    }
-
-    long totalSeconds = duration.getSeconds();
-    long days = totalSeconds / 86400;
-    long hours = (totalSeconds % 86400) / 3600;
-    long minutes = (totalSeconds % 3600) / 60;
-    long seconds = totalSeconds % 60;
-
-    StringBuilder result = new StringBuilder();
-
-    if (days > 0) result.append(days).append("d ");
-    if (hours > 0) result.append(hours).append("h ");
-    if (minutes > 0) result.append(minutes).append("m ");
-    if (seconds > 0 || result.length() == 0) result.append(seconds).append("s");
-
-    return result.toString().trim();
   }
 
   private String createScheduleId(Long messageId, boolean isContent) {

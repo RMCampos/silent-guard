@@ -59,7 +59,7 @@ public class MessageService {
     String targets = uniqueEmails.stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity message = new MessageEntity();
     message.setUserId(user.get().getId());
-    message.setTitle(messageDto.title());
+    message.setSubject(messageDto.subject());
     message.setTargets(targets);
     message.setContent(messageDto.content());
     message.setSpanDays(messageDto.daysToTrigger());
@@ -93,7 +93,7 @@ public class MessageService {
     persistentReminderService.cancelExistingTask(id, true);
     persistentReminderService.cancelExistingTask(id, false);
 
-    messageFromDb.setTitle(messageDto.title());
+    messageFromDb.setSubject(messageDto.subject());
     messageFromDb.setTargets(targets);
     messageFromDb.setContent(messageDto.content());
     messageFromDb.setSpanDays(messageDto.daysToTrigger());
@@ -134,6 +134,7 @@ public class MessageService {
     log.info("Disabled schedule engine for message id {}", id);
   }
 
+  @Transactional
   public void registerUserCheckIn(String confirmation) {
     try {
       log.info("Registering user check-in for confirmation id {}", confirmation);
@@ -144,7 +145,13 @@ public class MessageService {
         return;
       }
 
-      persistentReminderService.cancelExistingTask(messageOption.get().getId(), true);
+      MessageEntity message = messageOption.get();
+      message.setLastCheckIn(LocalDateTime.now());
+      message.setUpdatedAt(LocalDateTime.now());
+
+      messageRepository.save(message);
+
+      persistentReminderService.cancelExistingTask(message.getId(), true);
       log.info("Content message successfully canceled upon check in.");
     } catch (Exception e) {
       log.error("Error when registering user check in {}", e.getMessage());

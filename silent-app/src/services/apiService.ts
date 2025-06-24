@@ -40,7 +40,6 @@ export const getMessages = async (token: string | null) => {
 
   if (response.ok) {
     const json = await response.json();
-    // TODO: create list of recipients manually
     return json;
   }
 
@@ -69,6 +68,14 @@ export const createMessage = async (token: string | null, payload: Message) => {
   const contentType = response.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
     const data = await response.json();
+    if ('errorMessage' in data && 'fields' in data) {
+      const finalMessage: string[] = [];
+      finalMessage.push(data.errorMessage);
+      for (const field of data.fields) {
+        finalMessage.push(` ${field.fieldName}: ${field.fieldMessage}`)
+      }
+      throw new Error(finalMessage.join(''));
+    }
     throw new Error(data.message);
   }
 

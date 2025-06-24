@@ -5,12 +5,14 @@ import { useAuth0 } from '@auth0/auth0-react';
 import AccountModal from '../components/AccountModal';
 import { createMessage, deleteMessage, getMessages, signInOrSignUpUser, updateMessage } from '../services/apiService';
 import { useToken } from '../context/TokenContext';
+import { handleAndDisplayError } from '../utils/Utils';
+import swal from 'sweetalert';
 
 type Props = {
   setPageChanged: () => void;
 };
 
-const emptyMessage: Message = { id: 0, title: '', content: '', daysToTrigger: 30, recipients: [], active: true };
+const emptyMessage: Message = { id: 0, subject: '', content: '', daysToTrigger: 30, recipients: [], active: true };
 
 const DashboardPage: React.FC<Props> = (props) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,26 +32,32 @@ const DashboardPage: React.FC<Props> = (props) => {
         fetchAllMessages();
       }
       catch (e: unknown) {
-        const error = e as Error;
-        console.error(error);
-        // TODO: handle error nicely
+        handleAndDisplayError(e);
       }
     } else {
       try {
         const cleanEmails = newMessage.recipients.map(email => email.trim());
         await createMessage(accessToken, { ...newMessage, recipients: cleanEmails });
+        setNewMessage(emptyMessage);
         fetchAllMessages();
       }
       catch (e: unknown) {
-        const error = e as Error;
-        console.error(error);
-        // TODO: handle error nicely
+        handleAndDisplayError(e);
       }
     }
   };
 
   const handleDeleteMessage = async (id: number) => {
-    if (confirm('Are you sure you want to delete this message?')) {
+    const willDelete = await swal({
+      title: "Are you sure?",
+      text: 'You want to delete this message?',
+      icon: 'warning',
+      dangerMode: true,
+      closeOnEsc: true,
+      buttons:["No", "Yes"],
+    });
+
+    if (willDelete) {
       const messageToDelete = messages.filter(msg => msg.id === id);
 
       if (messageToDelete.length > 0) {
@@ -59,9 +67,7 @@ const DashboardPage: React.FC<Props> = (props) => {
           fetchAllMessages();
         }
         catch (e: unknown) {
-          const error = e as Error;
-          console.error(error);
-          // TODO: handle error nicely
+          handleAndDisplayError(e);
         }
       }
     }
@@ -73,9 +79,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         const messagesFetched: Message[] = await getMessages(accessToken);
         setMessages(messagesFetched);
       } catch (e: unknown) {
-        const error = e as Error;
-        console.error(error);
-        // TODO: handle error nicely
+        handleAndDisplayError(e);
       }
     }
   }, [userValidated, accessToken]);
@@ -91,9 +95,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         fetchAllMessages();
       }
       catch (e: unknown) {
-        const error = e as Error;
-        console.error(error);
-        // TODO: handle error nicely
+        handleAndDisplayError(e);
       }
     }
   };
@@ -110,10 +112,23 @@ const DashboardPage: React.FC<Props> = (props) => {
         props.setPageChanged();
       }
       else {
-        console.error(err);
+        handleAndDisplayError(e);
       }
     }
   }, [props, accessToken]);
+
+  const createFooterMessage = (message: Message): string => {
+    const parts: string[] = [];
+    parts.push(`Trigger every ${message.daysToTrigger} day(s); `);
+    if (message.lastCheckIn) {
+      parts.push(`Last check-in: ${message.lastCheckIn}; `);
+    }
+    else {
+      parts.push('Last check-in: N/A; ');
+    }
+    parts.push(`Next reminder: ${message.nextReminder}`);
+    return parts.join('');
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -165,13 +180,13 @@ const DashboardPage: React.FC<Props> = (props) => {
 
           {/* New Message Form */}
           <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Create New Message</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Create new scheduled message</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <input
                 type="text"
-                placeholder="Message title"
-                value={newMessage.title}
-                onChange={(e) => setNewMessage({ ...newMessage, title: e.target.value })}
+                placeholder="Message subject"
+                value={newMessage.subject}
+                onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <input
@@ -205,7 +220,7 @@ const DashboardPage: React.FC<Props> = (props) => {
               </div>
               <button
                 onClick={handleSaveMessage}
-                disabled={!newMessage.title || !newMessage.content || !newMessage.recipients}
+                disabled={!newMessage.subject || !newMessage.content || !newMessage.recipients}
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -222,8 +237,8 @@ const DashboardPage: React.FC<Props> = (props) => {
                   <div className="space-y-4">
                     <input
                       type="text"
-                      value={editingMessage.title}
-                      onChange={(e) => setEditingMessage({ ...editingMessage, title: e.target.value })}
+                      value={editingMessage.subject}
+                      onChange={(e) => setEditingMessage({ ...editingMessage, subject: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <input
@@ -272,13 +287,13 @@ const DashboardPage: React.FC<Props> = (props) => {
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900">{message.title}</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{message.subject}</h3>
                         <p className="text-sm text-gray-600">To: {message.recipients.join(', ')}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${message.active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                           }`}>
                           {message.active ? 'Active' : 'Inactive'}
                         </span>
@@ -287,17 +302,15 @@ const DashboardPage: React.FC<Props> = (props) => {
                     <p className="text-gray-700 mb-4">{message.content}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
-                        Trigger every {message.daysToTrigger} day(s)
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        Last check-in Sat, June 21 2025
+                        {createFooterMessage(message)}
+                        
                       </span>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => toggleMessageStatus(message.id)}
                           className={`px-3 py-1 rounded-lg text-sm transition-colors ${message.active
-                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                            : 'bg-green-100 text-green-700 hover:bg-green-200'
                             }`}
                         >
                           {message.active ? 'Deactivate' : 'Activate'}

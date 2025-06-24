@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Clock, Mail, Shield } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { checkInConfirmation } from '../services/apiService';
+import { handleAndDisplayError } from '../utils/Utils';
 
 const LandingPage: React.FC = () => {
   const [confirmationDone, setConfirmationDone] = useState<boolean>(false);
@@ -29,9 +30,7 @@ const LandingPage: React.FC = () => {
       setConfirmationDone(true);
     }
     catch (e) {
-      const error = e as Error;
-      console.error(error);
-      // TODO: handle error nicely
+      handleAndDisplayError(e);
     }
   };
 

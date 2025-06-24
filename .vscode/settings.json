@@ -4,6 +4,7 @@
     "Mailgun",
     "ricardocampos",
     "silentguardapi",
+    "swal",
     "userinfo"
   ],
   "java.configuration.updateBuildConfiguration": "interactive"

@@ -1,8 +1,10 @@
 export type Message = {
   id: number;
-  title: string;
+  subject: string;
   content: string;
   daysToTrigger: number;
   recipients: string[];
-  active: boolean
+  active: boolean;
+  lastCheckIn?: string;
+  nextReminder?: string;
 };
