@@ -40,7 +40,7 @@ public class MailgunEmailService {
 
     String to = recipients.getFirst();
     String subject = "Silent Guard hasn't heard from you in a while!";
-    String link = getBaseUrl() + "/check-in?confirmation=%s";
+    String link = getBaseUrl() + "?confirmation=%s";
 
     MailgunTemplateCheckIn checkInTemplate = new MailgunTemplateCheckIn();
     checkInTemplate.setCheckInLink(String.format(link, confirmationId));
@@ -61,11 +61,10 @@ public class MailgunEmailService {
     log.info("Check-in message sent successfully: {}", sent);
   }
 
-  public void sendHtmlContentMessage(List<String> recipients, String htmlContent) {
+  public void sendHtmlContentMessage(List<String> recipients, String subject, String htmlContent) {
     log.info("Sending HTML content message");
 
     String to = recipients.getFirst();
-    String subject = "Silent Guard hasn't heard from you in a while!";
 
     MailgunTemplateHtml htmlTemplate = new MailgunTemplateHtml();
     htmlTemplate.setHtmlCode(htmlContent);

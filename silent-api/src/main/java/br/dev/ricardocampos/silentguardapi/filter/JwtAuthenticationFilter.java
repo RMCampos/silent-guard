@@ -29,6 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
+    final String requestUri = request.getServletPath();
+    if (requestUri.startsWith("/api/confirmation")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     final String authorizationHeader = request.getHeader("Authorization");
 
     if (Objects.isNull(authorizationHeader) || authorizationHeader.isBlank()) {

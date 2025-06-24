@@ -2,15 +2,17 @@ import type { Message } from "../types/Message";
 
 const apiUrl: string = import.meta.env.VITE_BACKEND_API ?? '';
 
-const getHeaders = (token: string | null): Headers => {
+const getHeaders = (token?: string | null): Headers => {
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
-  headers.append('Authorization', `Bearer ${token}`);
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
   return headers;
 }
 
 export const signInOrSignUpUser = async (token: string | null) => {
-  const response = await fetch(`${apiUrl}/user`, {
+  const response = await fetch(`${apiUrl}/messages/user`, {
     method: 'POST',
     mode: 'cors',
     headers: getHeaders(token)
@@ -117,4 +119,22 @@ export const deleteMessage = async (token: string | null, id: number) => {
   }
 
   throw new Error('Something went wrong!');
+}
+
+export const checkInConfirmation = async (payload: { confirmation: string }) => {
+  const response = await fetch(`${apiUrl}/confirmation/check-in/${payload.confirmation}`, {
+    method: 'PUT',
+    mode: 'cors',
+    headers: getHeaders()
+  });
+
+  if (response.status === 204) {
+    return;
+  }
+
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
 }

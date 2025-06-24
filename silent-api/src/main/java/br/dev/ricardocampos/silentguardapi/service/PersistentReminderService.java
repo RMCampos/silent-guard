@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class PersistentReminderService {
 
   private final MailgunEmailService mailgunEmailService;
 
-  private static final Map<Long, ScheduledFuture<?>> activeTasks = new ConcurrentHashMap<>();
+  private static final Map<String, ScheduledFuture<?>> activeTasks = new ConcurrentHashMap<>();
 
   @PostConstruct
   public void restoreSchedulesOnStartup() {
@@ -46,8 +46,20 @@ public class PersistentReminderService {
     // TODO: handle update or existing messages/schedules
 
     // Calculate delay until next reminder
-    Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
-    Duration interval = Duration.ofDays(message.getSpanDays());
+
+    // Prod:
+    // Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
+
+    // Dev:
+    Duration initialDelay =
+        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusMinutes(5));
+
+    // Prod:
+    // Duration interval = Duration.ofDays(message.getSpanDays());
+
+    // Dev:
+    Duration interval = Duration.ofMinutes(5);
+
     if (initialDelay.isNegative()) {
       initialDelay = Duration.ZERO; // Send immediately if overdue
     }
@@ -62,11 +74,12 @@ public class PersistentReminderService {
         taskScheduler.scheduleWithFixedDelay(
             () -> handleReminderAndUpdateDb(message), Instant.now().plus(initialDelay), interval);
 
-    activeTasks.put(message.getId(), future);
+    activeTasks.put(createScheduleId(message.getId(), false), future);
   }
 
   private void handleReminderAndUpdateDb(MessageEntity message) {
     try {
+      log.info("Handling check-in message schedule for message id {}", message.getId());
       List<String> recipients = Arrays.asList(message.getTargets().split(";"));
       mailgunEmailService.sendCheckInRequest(recipients, message.getReminderUuid().toString());
 
@@ -77,6 +90,7 @@ public class PersistentReminderService {
               reminder -> {
                 reminder.setLastReminderSent(LocalDateTime.now());
                 reminder.setNextReminderDue(LocalDateTime.now().plusDays(reminder.getSpanDays()));
+                reminder.setUpdatedAt(LocalDateTime.now());
                 messageRepository.saveAndFlush(reminder);
               });
 
@@ -91,11 +105,16 @@ public class PersistentReminderService {
   public void scheduleContentMessage(MessageEntity message) {
     // TODO: handle update or existing messages/schedules
 
+    // Prod
+    // Duration initialDelay = Duration.between(LocalDateTime.now(),
+    // LocalDateTime.now().plusHours(12));
+
+    // Dev:
     Duration initialDelay =
-        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusHours(12));
+        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusMinutes(2));
 
     log.info(
-        "Scheduling check-in message {} to be sent in {}, then repeat after {} days",
+        "Scheduling content message id {} to be sent in {}, if not cancelled",
         message.getId(),
         formatDuration(initialDelay),
         message.getSpanDays());
@@ -104,47 +123,64 @@ public class PersistentReminderService {
         taskScheduler.schedule(
             () -> handleContentReminderAndUpdateDb(message), Instant.now().plus(initialDelay));
 
-    activeTasks.put(message.getId(), future);
+    activeTasks.put(createScheduleId(message.getId(), true), future);
   }
 
   private void handleContentReminderAndUpdateDb(MessageEntity message) {
     try {
-      // get last_check_in
-      // if time between last checking and now, send email
-      Optional<MessageEntity> messageOpt = messageRepository.findById(message.getId());
+      log.info("Handling content message schedule for message id {}", message.getId());
 
-      // keep going from here
+      // If time between now last checking is greater than 12 hours, send the content email
+      MessageEntity messageOpt = messageRepository.findById(message.getId()).orElseThrow();
 
-      List<String> recipients = Arrays.asList(message.getTargets().split(";"));
-      mailgunEmailService.sendHtmlContentMessage(recipients, message.getContent());
+      LocalDateTime lastChecking = messageOpt.getLastCheckIn();
+      if (Objects.isNull(lastChecking)) {
+        lastChecking = LocalDateTime.now().plusYears(99);
+      }
+      Duration timePast = Duration.between(LocalDateTime.now(), lastChecking);
 
-      // Update database with last sent time
+      // Prod
+      // if (timePast.toHours() < 12) {
+
+      // Dev
+      if (timePast.toMinutes() < 2) {
+        log.info("Skipping content message. User {} did the check in", message.getUserId());
+        return;
+      }
+
+      log.info("User {} didn't check in. Sending content message.", message.getUserId());
+
+      List<String> recipients = Arrays.asList(messageOpt.getTargets().split(";"));
+      mailgunEmailService.sendHtmlContentMessage(
+          recipients, messageOpt.getTitle(), messageOpt.getContent());
+
+      // Update database disabling the current message
       messageRepository
           .findById(message.getId())
           .ifPresent(
               reminder -> {
-                reminder.setLastReminderSent(LocalDateTime.now());
-                reminder.setNextReminderDue(LocalDateTime.now().plusDays(reminder.getSpanDays()));
+                reminder.setUpdatedAt(LocalDateTime.now());
+                reminder.setDisabledAt(LocalDateTime.now());
                 messageRepository.saveAndFlush(reminder);
               });
 
-      // Schedule HTML content to be sent if not confirmed
-      scheduleContentMessage(message);
+      cancelExistingTask(message.getId(), false);
+      cancelExistingTask(message.getId(), true);
 
     } catch (Exception e) {
-      log.error("Failed to send reminder for message id {}", message.getId(), e);
+      log.error("Failed to send content message for message id {}", message.getId(), e);
     }
   }
 
-  public void cancelExistingTask(Long messageId) {
-    log.info("Canceling existing task: {}", messageId);
-    ScheduledFuture<?> existingTask = activeTasks.remove(messageId);
+  public void cancelExistingTask(Long messageId, boolean isContent) {
+    log.info("Canceling existing task: {} for content {}", messageId, isContent);
+    ScheduledFuture<?> existingTask = activeTasks.remove(createScheduleId(messageId, isContent));
 
     if (existingTask != null) {
       boolean cancelled = existingTask.cancel(false); // false = don't interrupt if running
 
       if (cancelled) {
-        log.info("Successfully cancelled existing reminder task for message {}", messageId);
+        log.info("Successfully cancelled existing scheduled task for message {}", messageId);
       } else {
         log.warn(
             "Failed to cancel existing reminder task for message {} - task may have already"
@@ -175,5 +211,9 @@ public class PersistentReminderService {
     if (seconds > 0 || result.length() == 0) result.append(seconds).append("s");
 
     return result.toString().trim();
+  }
+
+  private String createScheduleId(Long messageId, boolean isContent) {
+    return messageId.toString() + (isContent ? "-check-in" : "-content");
   }
 }

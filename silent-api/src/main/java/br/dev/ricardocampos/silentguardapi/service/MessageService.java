@@ -10,12 +10,14 @@ import br.dev.ricardocampos.silentguardapi.exception.MessageNotFoundException;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
 import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
 import br.dev.ricardocampos.silentguardapi.util.UuidUtil;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class MessageService {
     return messageList.stream().map(MessageDto::fromEntity).toList();
   }
 
+  @Transactional
   public MessageDto createMessage(MessageDto messageDto) {
     Optional<UserEntity> user = getUserEntity();
     log.info("Creating message for user {}", user.get().getId());
@@ -73,6 +76,7 @@ public class MessageService {
     return MessageDto.fromEntity(message);
   }
 
+  @Transactional
   public void updateMessage(Long id, MessageDto messageDto) {
     Optional<UserEntity> user = getUserEntity();
     log.info("Updating message for user {}", user.get().getId());
@@ -85,12 +89,19 @@ public class MessageService {
     String targets =
         messageDto.recipients().stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity messageFromDb = messageOptional.get();
+
+    persistentReminderService.cancelExistingTask(id, true);
+    persistentReminderService.cancelExistingTask(id, false);
+
     messageFromDb.setTitle(messageDto.title());
     messageFromDb.setTargets(targets);
     messageFromDb.setContent(messageDto.content());
     messageFromDb.setSpanDays(messageDto.daysToTrigger());
     messageFromDb.setUpdatedAt(LocalDateTime.now());
     messageFromDb.setDisabledAt(null);
+    messageFromDb.setLastReminderSent(null);
+    messageFromDb.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.daysToTrigger()));
+    messageFromDb.setReminderUuid(new UuidUtil().generateRecipientUuid(targets));
 
     if (!messageDto.active()) {
       messageFromDb.setDisabledAt(LocalDateTime.now());
@@ -100,12 +111,12 @@ public class MessageService {
 
     log.info("Message updated for user {}", user.get().getId());
 
-    if (!messageDto.active()) {
-      log.info("Disabling schedule engine for message id {}", id);
-      // stop scheduled tasks
+    if (messageDto.active()) {
+      persistentReminderService.scheduleCheckingMessage(messageFromDb);
     }
   }
 
+  @Transactional
   public void deleteMessage(Long id) {
     Optional<UserEntity> user = getUserEntity();
     log.info("Deleting message for user {}", user.get().getId());
@@ -116,12 +127,28 @@ public class MessageService {
     }
 
     messageRepository.delete(messageOptional.get());
-    persistentReminderService.cancelExistingTask(id);
-
     log.info("Message updated for user {}", user.get().getId());
 
-    log.info("Disabling schedule engine for message id {}", id);
-    // stop scheduled tasks
+    persistentReminderService.cancelExistingTask(id, true);
+    persistentReminderService.cancelExistingTask(id, false);
+    log.info("Disabled schedule engine for message id {}", id);
+  }
+
+  public void registerUserCheckIn(String confirmation) {
+    try {
+      log.info("Registering user check-in for confirmation id {}", confirmation);
+      Optional<MessageEntity> messageOption =
+          messageRepository.findByReminderUuid(UUID.fromString(confirmation));
+      if (messageOption.isEmpty()) {
+        log.info("Message not found for the confirmation id {}", confirmation);
+        return;
+      }
+
+      persistentReminderService.cancelExistingTask(messageOption.get().getId(), true);
+      log.info("Content message successfully canceled upon check in.");
+    } catch (Exception e) {
+      log.error("Error when registering user check in {}", e.getMessage());
+    }
   }
 
   private Optional<UserEntity> getUserEntity() {

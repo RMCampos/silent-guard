@@ -4,7 +4,6 @@ import br.dev.ricardocampos.silentguardapi.dto.MessageDto;
 import br.dev.ricardocampos.silentguardapi.service.MessageService;
 import br.dev.ricardocampos.silentguardapi.service.UserService;
 import jakarta.validation.Valid;
-
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/messages")
 @AllArgsConstructor
 public class Controller {
 
@@ -28,24 +27,24 @@ public class Controller {
 
   private final MessageService messageService;
 
-  @GetMapping("/messages")
+  @GetMapping
   public ResponseEntity<List<MessageDto>> getMessages() {
     return ResponseEntity.ok(messageService.getMessages());
   }
 
-  @PutMapping("/messages")
+  @PutMapping
   public ResponseEntity<MessageDto> createMessage(@Valid @RequestBody MessageDto messageDto) {
     return ResponseEntity.ok(messageService.createMessage(messageDto));
   }
 
-  @PostMapping("/messages/{id}")
+  @PostMapping("/{id}")
   public ResponseEntity<Void> updateMessage(
       @RequestBody MessageDto messageDto, @PathVariable("id") Long id) {
     messageService.updateMessage(id, messageDto);
     return ResponseEntity.noContent().build();
   }
 
-  @DeleteMapping("/messages/{id}")
+  @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteMessage(@PathVariable("id") Long id) {
     messageService.deleteMessage(id);
     return ResponseEntity.noContent().build();

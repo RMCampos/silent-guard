@@ -30,7 +30,9 @@ public class SecurityConfig {
                 request
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
-                    .requestMatchers("/api/**")
+                    .requestMatchers("/api/confirmation/**")
+                    .permitAll()
+                    .requestMatchers("/api/messages/**")
                     .authenticated()
                     .anyRequest()
                     .permitAll())
