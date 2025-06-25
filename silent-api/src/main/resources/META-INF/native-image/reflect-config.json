@@ -1,0 +1,37 @@
+[
+  {
+    "name": "com.github.benmanes.caffeine.cache.LocalCacheFactory",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.NodeFactory", 
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+  },
+  {
+    "condition": {"typeReachable": "com.github.benmanes.caffeine.cache.Caffeine"},
+    "name": "com.github.benmanes.caffeine.cache.PSAWMS",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {"typeReachable": "com.github.benmanes.caffeine.cache.Caffeine"},
+    "name": "com.github.benmanes.caffeine.cache.SSLSMSAW",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {"typeReachable": "com.github.benmanes.caffeine.cache.Caffeine"},
+    "name": "com.github.benmanes.caffeine.cache.SSLMSW", 
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {"typeReachable": "com.github.benmanes.caffeine.cache.Caffeine"},
+    "name": "com.github.benmanes.caffeine.cache.SSSMSW",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {"typeReachable": "com.github.benmanes.caffeine.cache.Caffeine"},
+    "name": "com.github.benmanes.caffeine.cache.SSSW",
+    "allDeclaredConstructors": true
+  }
+]
