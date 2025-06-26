@@ -75,7 +75,7 @@ scp "client_$VERSION.zip" root@$SERVER_IP:/root/
 
 ```bash
 docker run -d -p 5432:5432 --rm \
-  --name database \
+  --name silent-db \
   -e POSTGRES_DB=$POSTGRES_DB \
   -e POSTGRES_USER=$POSTGRES_USER \
   -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
@@ -86,7 +86,7 @@ docker run -d -p 5432:5432 --rm \
 
 ```bash
 docker run -p 8080:8080 --rm \
-  --name silent-guard-api \
+  --name silent-api \
   -e AUTH_DOMAIN=$AUTH_DOMAIN \
   -e API_IDENTIFIER=$API_IDENTIFIER \
   -e POSTGRES_DB=$POSTGRES_DB \

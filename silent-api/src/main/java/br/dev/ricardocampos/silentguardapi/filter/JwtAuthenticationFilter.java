@@ -35,6 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    if (requestUri.startsWith("/actuator")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     final String authorizationHeader = request.getHeader("Authorization");
 
     if (Objects.isNull(authorizationHeader) || authorizationHeader.isBlank()) {

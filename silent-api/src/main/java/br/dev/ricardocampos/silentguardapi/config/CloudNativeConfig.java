@@ -1,5 +1,9 @@
 package br.dev.ricardocampos.silentguardapi.config;
 
+import br.dev.ricardocampos.silentguardapi.dto.FieldIssueDto;
+import br.dev.ricardocampos.silentguardapi.dto.MessageDto;
+import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
+import io.micrometer.core.instrument.config.validate.ValidationException;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
@@ -10,6 +14,10 @@ import org.springframework.context.annotation.ImportRuntimeHints;
   com.github.benmanes.caffeine.cache.Cache.class,
   com.github.benmanes.caffeine.cache.Caffeine.class,
   com.github.benmanes.caffeine.cache.LoadingCache.class,
+  FieldIssueDto.class,
+  MessageDto.class,
+  UserInfoDto.class,
+  ValidationException.class,
 })
 @ImportRuntimeHints({
   HttpServletRequestRuntimeHint.class,

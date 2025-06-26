@@ -11,7 +11,11 @@ COPY .mvn/ ./.mvn
 RUN ./mvnw -B package -Pnative -DskipTests
 
 ### Deployer
-FROM gcr.io/distroless/java21-debian12:nonroot
+FROM debian:12.11-slim AS deploy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy
 WORKDIR /app
@@ -31,8 +35,10 @@ LABEL org.opencontainers.image.authors="Ricardo Campos <ricardompcampos@gmail.co
       org.opencontainers.image.source="https://github.com/RMCampos/silent-guard"
 
 # User, port and health check
+USER 1001
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s CMD ["curl", "-f", "http://localhost:8080/actuator/health"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["curl", "-f", "http://localhost:8080/actuator/health"]
 
 # Startup
 ENTRYPOINT ["/app/silentguardapi", "-Dspring.profiles.active=prod"]
