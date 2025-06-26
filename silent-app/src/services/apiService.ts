@@ -1,6 +1,7 @@
+import { env } from "../env";
 import type { Message } from "../types/Message";
 
-const apiUrl: string = import.meta.env.VITE_BACKEND_API ?? '';
+const apiUrl: string = `${env.VITE_BACKEND_API}/api`;
 
 const getHeaders = (token?: string | null): Headers => {
   const headers = new Headers();
