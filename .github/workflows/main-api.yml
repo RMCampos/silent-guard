@@ -1,0 +1,156 @@
+name: Main Server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'silent-api/**/*.java'
+      - 'silent-api/**/*.xml'
+      - 'silent-api/Dockerfile'
+
+jobs:
+  java-code-checks:
+    name: Server Code Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4.2.3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        run: cd silent-api && ./mvnw --no-transfer-progress clean compile -DskipTests
+
+      - name: Google Checkstyle
+        run: cd silent-api && ./mvnw --no-transfer-progress checkstyle:checkstyle -Dskip.checkstyle=false
+
+  image-promotion-and-deploy:
+    name: Image promotion and deployment
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_DOMAIN: ${{ vars.DEPLOY_DOMAIN }}
+      GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
+      GHCR_PASSWORD: ${{ secrets.GHCR_PASSWORD }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      DOKPLOY_API_APPID: ${{ secrets.DOKPLOY_API_APPID }}
+    steps:
+      - uses: docker/login-action@v3
+        name: Login to GitHub Container Registry
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image with source tag
+        run: docker pull ghcr.io/RMCampos/silent-guard/silent-api:candidate
+
+      - name: Extract PR number using docker inspect
+        id: inspect
+        run: |
+          SOURCE_PR=$(docker inspect ghcr.io/RMCampos/silent-guard/silent-api:candidate | jq -r '.[0].Config.Env[] | select(startswith("SOURCE_PR="))' | sed -n 's/SOURCE_PR=\(v[0-9]*\).*/\1/p')
+          echo "SOURCE_PR=$SOURCE_PR" >> $GITHUB_ENV
+          echo "source_pr=$SOURCE_PR" >> $GITHUB_OUTPUT
+
+      - name: Re-tag the image
+        run: docker tag ghcr.io/RMCampos/silent-guard/silent-api:candidate ghcr.io/RMCampos/silent-guard/silent-api:prod-${{ steps.inspect.outputs.source_pr }}
+
+      - name: Push new tag
+        run: docker push ghcr.io/RMCampos/silent-guard/silent-api:prod-${{ steps.inspect.outputs.source_pr }}
+
+      - name: Checking cURL version
+        run: curl --version
+
+      - name: Update image tag to be deployed
+        uses: nick-fields/retry@v3.0.2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            response=$(curl -X POST \
+              "${DEPLOY_DOMAIN}/api/application.saveDockerProvider" \
+              --max-time 30 \
+              -H "accept: application/json" \
+              -H "Content-Type: application/json" \
+              -H "x-api-key: ${DOKPLOY_API_KEY}" \
+              -d '{
+                "dockerImage": "ghcr.io/RMCampos/silent-guard/silent-api:prod-${{ steps.inspect.outputs.source_pr }}",
+                "applicationId": "'"${DOKPLOY_API_APPID}"'",
+                "username": "'"${GHCR_USERNAME}"'",
+                "password": "'"${GHCR_PASSWORD}"'",
+                "registryUrl": "ghcr.io"
+                }' \
+              -w "\n%{http_code}" \
+              -s)
+
+            status_code=$(echo "$response" | tail -n1)
+            echo "Status code: $status_code"
+
+            if [ "$status_code" != "200" ]; then
+              body=$(echo "$response" | sed '$d')
+              
+              echo "Update failed with status code $status_code"
+              echo -e "Response body: $body"
+              exit 1
+            else
+              echo "Updated succeeded!"
+            fi
+
+      - name: Trigger Deployment
+        uses: nick-fields/retry@v3.0.2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          command: |
+            sleep 15
+
+            response=$(curl -X POST \
+              "${DEPLOY_DOMAIN}/api/application.deploy" \
+              --max-time 30 \
+              -H "accept: application/json" \
+              -H "x-api-key: ${DOKPLOY_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"applicationId\":\"${DOKPLOY_API_APPID}\"}" \
+              -w "\n%{http_code}" \
+              -s)
+
+            status_code=$(echo "$response" | tail -n1)
+            echo "Status code: $status_code"
+
+            if [ "$status_code" != "200" ]; then
+              body=$(echo "$response" | sed '$d')
+              
+              echo "Deployment failed with status code $status_code"
+              echo "Response body: $body"
+              exit 1
+            else
+              echo "Deployment succeeded!"
+            fi
+
+      - name: Verify deployment
+        run: |
+          # Wait for deployment to complete
+          sleep 15
+    
+          if ! curl -s -f "${{ vars.API_URL }}/actuator/health"; then
+            echo "Prod environment is not healthy"
+            exit 1
+          else
+            echo "Prod environment is healthy"
+          fi
