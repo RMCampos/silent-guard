@@ -4,6 +4,11 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { checkInConfirmation } from '../services/apiService';
 import { handleAndDisplayError } from '../utils/Utils';
 
+/**
+ * Renders the LandingPage component.
+ *
+ * @returns JXS Element rendered.
+ */
 const LandingPage: React.FC = () => {
   const [confirmationDone, setConfirmationDone] = useState<boolean>(false);
   const { loginWithRedirect } = useAuth0();
