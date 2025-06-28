@@ -56,20 +56,20 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull image with source tag
-        run: docker pull ghcr.io/RMCampos/silent-guard/silent-app:candidate
+        run: docker pull ghcr.io/rmcampos/silent-guard/silent-app:candidate
 
       - name: Extract PR number using docker inspect
         id: inspect
         run: |
-          SOURCE_PR=$(docker inspect ghcr.io/RMCampos/silent-guard/silent-app:candidate | jq -r '.[0].Config.Env[] | select(startswith("SOURCE_PR="))' | sed -n 's/SOURCE_PR=\(v[0-9]*\).*/\1/p')
+          SOURCE_PR=$(docker inspect ghcr.io/rmcampos/silent-guard/silent-app:candidate | jq -r '.[0].Config.Env[] | select(startswith("SOURCE_PR="))' | sed -n 's/SOURCE_PR=\(v[0-9]*\).*/\1/p')
           echo "SOURCE_PR=$SOURCE_PR" >> $GITHUB_ENV
           echo "source_pr=$SOURCE_PR" >> $GITHUB_OUTPUT
 
       - name: Re-tag the image
-        run: docker tag ghcr.io/RMCampos/silent-guard/silent-app:candidate ghcr.io/RMCampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}
+        run: docker tag ghcr.io/rmcampos/silent-guard/silent-app:candidate ghcr.io/rmcampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}
 
       - name: Push new tag
-        run: docker push ghcr.io/RMCampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}
+        run: docker push ghcr.io/rmcampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}
 
       - name: Checking cURL version
         run: curl --version
@@ -87,7 +87,7 @@ jobs:
               -H "Content-Type: application/json" \
               -H "x-api-key: ${DOKPLOY_API_KEY}" \
               -d '{
-                "dockerImage": "ghcr.io/RMCampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}",
+                "dockerImage": "ghcr.io/rmcampos/silent-guard/silent-app:prod-${{ steps.inspect.outputs.source_pr }}",
                 "applicationId": "'"${DOKPLOY_APP_APPID}"'",
                 "username": "'"${GHCR_USERNAME}"'",
                 "password": "'"${GHCR_PASSWORD}"'",

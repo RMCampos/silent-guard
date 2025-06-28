@@ -130,6 +130,14 @@ const DashboardPage: React.FC<Props> = (props) => {
     return parts.join('');
   };
 
+  const handleLogout = async () => {
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       props.setPageChanged();
@@ -161,7 +169,7 @@ const DashboardPage: React.FC<Props> = (props) => {
                 <span>Account</span>
               </button>
               <button
-                onClick={() => logout({})}
+                onClick={handleLogout}
                 className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
               >
                 <LogOut className="w-5 h-5" />

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/** Defines the Silent Guard API entrypoint. */
 @Slf4j
 @SpringBootApplication
 @EnableCaching
@@ -23,6 +24,6 @@ public class SilentGuardApiApplication {
 
   @PostConstruct
   public void started() {
-    log.info("API service loaded. Config loaded: {}", appConfig.toString());
+    log.info("API service is ready. Config loaded: {}", appConfig.toString());
   }
 }
