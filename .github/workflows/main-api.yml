@@ -44,6 +44,9 @@ jobs:
   image-promotion-and-deploy:
     name: Image promotion and deployment
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       DEPLOY_DOMAIN: ${{ vars.DEPLOY_DOMAIN }}
       GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
