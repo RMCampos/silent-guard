@@ -152,7 +152,6 @@ public class MailgunEmailService {
         || Objects.isNull(appConfig.getTargetEnv())) {
       return "http://localhost:5173";
     }
-    String stage = appConfig.getTargetEnv().equals("stage") ? "stage." : "";
-    return String.format("https://%s%s", stage, appConfig.getTargetEnv());
+    return String.format("https://%s%s", "silentguard.", appConfig.getMailgunDomain() + "/");
   }
 }
