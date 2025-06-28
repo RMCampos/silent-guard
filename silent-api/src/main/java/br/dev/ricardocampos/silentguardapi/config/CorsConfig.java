@@ -8,6 +8,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Configuration class for CORS (Cross-Origin Resource Sharing) settings. This class allows specific
+ * origins to access the API and defines allowed headers and methods.
+ */
 @Slf4j
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
@@ -15,6 +19,12 @@ public class CorsConfig implements WebMvcConfigurer {
   @Value("${cors.allowed-origins}")
   private String[] allowedOrigins;
 
+  /**
+   * Configures CORS mappings for the application.
+   *
+   * @param registry the CorsRegistry to configure
+   */
+  @Override
   public void addCorsMappings(@NonNull CorsRegistry registry) {
     if (allowedOrigins != null && allowedOrigins.length > 0) {
       log.info("CORS policy allowed origins: {}", Arrays.asList(allowedOrigins));

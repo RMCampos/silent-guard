@@ -10,6 +10,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Data;
 
+/**
+ * Entity representing a message in the Silent Guard application. This entity stores information
+ * about messages sent to users, including the user ID, subject, targets, content, and various
+ * timestamps for reminders and checks.
+ */
 @Data
 @Entity
 @Table(name = "sg_messages")

@@ -23,6 +23,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for managing messages. This service provides methods to retrieve, create, update,
+ * and delete messages for a user. It also handles user check-ins and scheduling reminders.
+ */
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -38,6 +42,11 @@ public class MessageService {
 
   private final PersistentReminderService persistentReminderService;
 
+  /**
+   * Retrieves all messages for the authenticated user.
+   *
+   * @return a list of MessageDto objects representing the user's messages.
+   */
   public List<MessageDto> getMessages() {
     Optional<UserEntity> user = getUserEntity();
     log.info("Getting all messages for user {}", user.get().getId());
@@ -48,6 +57,12 @@ public class MessageService {
     return messageList.stream().map(MessageDto::fromEntity).toList();
   }
 
+  /**
+   * Creates a new message for the authenticated user.
+   *
+   * @param messageDto the MessageDto containing the details of the message to be created.
+   * @return the created MessageDto.
+   */
   @Transactional
   public MessageDto createMessage(MessageDto messageDto) {
     Optional<UserEntity> user = getUserEntity();
@@ -76,6 +91,12 @@ public class MessageService {
     return MessageDto.fromEntity(message);
   }
 
+  /**
+   * Updates an existing message for the authenticated user.
+   *
+   * @param id the ID of the message to be updated
+   * @param messageDto the MessageDto containing the updated details of the message
+   */
   @Transactional
   public void updateMessage(Long id, MessageDto messageDto) {
     Optional<UserEntity> user = getUserEntity();
@@ -116,6 +137,11 @@ public class MessageService {
     }
   }
 
+  /**
+   * Deletes a message by its ID for the authenticated user.
+   *
+   * @param id the ID of the message to be deleted
+   */
   @Transactional
   public void deleteMessage(Long id) {
     Optional<UserEntity> user = getUserEntity();
@@ -134,6 +160,11 @@ public class MessageService {
     log.info("Disabled schedule engine for message id {}", id);
   }
 
+  /**
+   * Registers a user check-in for a specific confirmation ID.
+   *
+   * @param confirmation the confirmation ID of the message to register the check-in for
+   */
   @Transactional
   public void registerUserCheckIn(String confirmation) {
     try {

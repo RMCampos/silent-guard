@@ -17,23 +17,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Service class for handling authentication-related operations, specifically fetching user
+ * information from Auth0 using a provided token. This service caches the user information to avoid
+ * repeated calls to Auth0 for the same token.
+ */
 @Slf4j
 @Service
 public class AuthService {
 
   private final AppConfig appConfig;
 
+  /**
+   * Constructs an AuthService with the specified AppConfig.
+   *
+   * @param appConfig the application configuration containing Auth0 domain and other settings
+   */
   public AuthService(AppConfig appConfig) {
     this.appConfig = appConfig;
   }
 
+  /**
+   * Retrieves user information from Auth0 using the provided token. The result is cached to improve
+   * performance and reduce the number of requests to Auth0.
+   *
+   * @param token the JWT token used to authenticate the request
+   * @return an Optional containing UserInfoDto if successful, or empty if not found or an error
+   *     occurs
+   */
   @Cacheable(value = "userInfoDto", key = "#token")
   public Optional<UserInfoDto> getUserInfo(String token) {
     log.info(
         "Token length: {}, Hash: {}, Ends with: {}",
         token.length(),
         token.hashCode(),
-        token.substring(token.length()-20));
+        token.substring(token.length() - 20));
 
     log.info("No cached version for the token, fetching from Auth0");
     String userInfoUrl = String.format("%s/userinfo", appConfig.getAuthZeroAuthDomain());

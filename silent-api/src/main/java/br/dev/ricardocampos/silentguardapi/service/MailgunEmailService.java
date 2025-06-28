@@ -22,6 +22,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Service class for sending emails using the Mailgun API. This service provides methods to send
+ * check-in requests and HTML content messages to specified recipients.
+ */
 @Slf4j
 @Service
 public class MailgunEmailService {
@@ -30,11 +34,23 @@ public class MailgunEmailService {
 
   private final AppConfig appConfig;
 
+  /**
+   * Constructs a MailgunEmailService with the specified RestTemplateBuilder and AppConfig.
+   *
+   * @param templateBuilder the RestTemplateBuilder to create the RestTemplate instance
+   * @param appConfig the application configuration containing Mailgun settings
+   */
   public MailgunEmailService(RestTemplateBuilder templateBuilder, AppConfig appConfig) {
     this.restTemplate = templateBuilder.build();
     this.appConfig = appConfig;
   }
 
+  /**
+   * Sends a check-in request email to the first recipient in the list and optionally CCs others.
+   *
+   * @param recipients the list of email addresses to send the check-in request to
+   * @param confirmationId the confirmation ID to include in the check-in link
+   */
   public void sendCheckInRequest(List<String> recipients, String confirmationId) {
     log.info("Sending check-in message");
 
@@ -61,6 +77,13 @@ public class MailgunEmailService {
     log.info("Check-in message sent successfully: {}", sent);
   }
 
+  /**
+   * Sends an HTML content message to the first recipient in the list and optionally CCs others.
+   *
+   * @param recipients the list of email addresses to send the HTML content message to
+   * @param subject the subject of the email
+   * @param htmlContent the HTML content to be included in the email body
+   */
   public void sendHtmlContentMessage(List<String> recipients, String subject, String htmlContent) {
     log.info("Sending HTML content message");
 

@@ -14,6 +14,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Configuration class for Spring Security. This class sets up security filters, JWT authentication,
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,6 +24,13 @@ public class SecurityConfig {
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
   String jwkSetUri;
 
+  /**
+   * Configures the security filter chain for the application.
+   *
+   * @param http the HttpSecurity object to configure
+   * @return the configured SecurityFilterChain
+   * @throws Exception if an error occurs during configuration
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.cors(Customizer.withDefaults())

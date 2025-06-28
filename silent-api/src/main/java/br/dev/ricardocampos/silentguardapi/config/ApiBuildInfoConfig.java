@@ -12,6 +12,11 @@ public class ApiBuildInfoConfig implements HealthIndicator {
   @Value("${br.dev.ricardocampos.silentguardapi.version}")
   private String apiBuildInfo;
 
+  /**
+   * Returns the build information of the API.
+   *
+   * @return the build information as a string.
+   */
   @Override
   public Health health() {
     return Health.up().withDetail("buildInfo", apiBuildInfo).build();

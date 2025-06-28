@@ -8,6 +8,10 @@ import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
+/**
+ * Configuration class for cloud-native features, including reflection hints and runtime hints. This
+ * class is used to register classes for reflection and import runtime hints.
+ */
 @Configuration
 @RegisterReflectionForBinding({
   com.github.benmanes.caffeine.cache.AsyncCacheLoader.class,
