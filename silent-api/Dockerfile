@@ -32,7 +32,7 @@ LABEL org.opencontainers.image.authors="Ricardo Campos <ricardompcampos@gmail.co
       org.opencontainers.image.title="Silent Guard API" \
       org.opencontainers.image.description="Spring Cloud Native REST API service" \
       org.opencontainers.image.version="${SOURCE_PR}" \
-      org.opencontainers.image.source="https://github.com/RMCampos/silent-guard"
+      org.opencontainers.image.source="https://github.com/rmcampos/silent-guard"
 
 # User, port and health check
 USER 1001

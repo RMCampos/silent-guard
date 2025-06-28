@@ -56,7 +56,7 @@ jobs:
         with:
           push: true
           context: ./silent-app
-          tags: ghcr.io/RMCampos/silent-guard/silent-app:candidate
+          tags: ghcr.io/rmcampos/silent-guard/silent-app:candidate
           build-args: |
             VITE_BUILD=v${{ github.event.number }}-${{ steps.date.outputs.date }}
             SOURCE_PR=v${{ github.event.number }}-${{ github.run_id }}-${{ steps.date.outputs.date }}

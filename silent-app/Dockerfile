@@ -28,7 +28,7 @@ LABEL org.opencontainers.image.authors="Ricardo Campos <ricardompcampos@gmail.co
       org.opencontainers.image.title="Silent Guard app" \
       org.opencontainers.image.description="Simple vanilla Vite Web app application" \
       org.opencontainers.image.version="${SOURCE_PR}" \
-      org.opencontainers.image.source="https://github.com/RMCampos/silent-guard"
+      org.opencontainers.image.source="https://github.com/rmcampos/silent-guard"
 
 # Copy files and run formatting
 COPY --from=build /app/dist/ /app/dist

@@ -65,7 +65,7 @@ jobs:
         with:
           push: true
           context: ./silent-api
-          tags: ghcr.io/RMCampos/silent-guard/silent-api:candidate
+          tags: ghcr.io/rmcampos/silent-guard/silent-api:candidate
           build-args: |
             BUILD=v${{ github.event.number }}-${{ steps.date.outputs.date }}
             SOURCE_PR=v${{ github.event.number }}-${{ github.run_id }}-${{ steps.date.outputs.date }}
