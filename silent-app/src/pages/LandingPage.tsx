@@ -3,6 +3,7 @@ import { Clock, Mail, Shield } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { checkInConfirmation } from '../services/apiService';
 import { handleAndDisplayError } from '../utils/Utils';
+import { env } from '../env';
 
 /**
  * Renders the LandingPage component.
@@ -149,6 +150,15 @@ const LandingPage: React.FC = () => {
           </div>
         </main>
       )}
+
+      {/* Footer */}
+      <footer className="px-6 py-4 border-t border-white/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-gray-400 text-sm">
+            Silent Guard {env.VITE_BUILD}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
