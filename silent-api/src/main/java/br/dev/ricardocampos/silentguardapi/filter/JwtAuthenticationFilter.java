@@ -13,16 +13,35 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Filter that intercepts incoming HTTP requests to check for a valid JWT token in the Authorization
+ * header. If the token is present, it sets the token in the BearerTokenHolder for further
+ * processing. If the token is missing or invalid, it responds with an unauthorized status.
+ */
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final BearerTokenHolder tokenHolder;
 
+  /**
+   * Constructs a JwtAuthenticationFilter with the specified BearerTokenHolder.
+   *
+   * @param tokenHolder the BearerTokenHolder to hold the JWT token
+   */
   public JwtAuthenticationFilter(BearerTokenHolder tokenHolder) {
     this.tokenHolder = tokenHolder;
   }
 
+  /**
+   * Filters the request and checks for a valid JWT token.
+   *
+   * @param request the HTTP request
+   * @param response the HTTP response
+   * @param filterChain the filter chain to continue processing the request
+   * @throws ServletException if an error occurs during filtering
+   * @throws IOException if an I/O error occurs
+   */
   @Override
   protected void doFilterInternal(
       @NonNull HttpServletRequest request,

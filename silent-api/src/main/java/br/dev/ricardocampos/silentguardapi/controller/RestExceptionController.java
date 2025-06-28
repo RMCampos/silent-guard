@@ -10,6 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class RestExceptionController {
 
+  /**
+   * Handles MethodArgumentNotValidException and returns a ResponseEntity with a
+   * ValidationExceptionDto.
+   *
+   * @param ex the MethodArgumentNotValidException to handle
+   * @return a ResponseEntity containing the validation errors
+   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ResponseEntity<ValidationExceptionDto> handleValidationException(
       MethodArgumentNotValidException ex) {

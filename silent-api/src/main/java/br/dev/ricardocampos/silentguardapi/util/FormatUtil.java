@@ -5,8 +5,20 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Objects;
 
+/**
+ * Utility class for formatting time-related information. This class provides methods to format a
+ * past time into a human-readable "time ago" format and to format a duration into a string
+ * representation.
+ */
 public class FormatUtil {
 
+  /**
+   * Formats a given past time into a human-readable "time ago" format.
+   *
+   * @param pastTime the past time to format
+   * @return a string representing the time elapsed since the past time, or "none" if the input is
+   *     null
+   */
   public static String formatTimeAgo(LocalDateTime pastTime) {
     if (Objects.isNull(pastTime)) {
       return "none";
@@ -41,6 +53,12 @@ public class FormatUtil {
     }
   }
 
+  /**
+   * Formats a given duration into a human-readable string representation.
+   *
+   * @param duration the duration to format
+   * @return a string representing the duration in days, hours, minutes, and seconds
+   */
   public static String formatDuration(Duration duration) {
     if (duration == null) {
       return "0 seconds";

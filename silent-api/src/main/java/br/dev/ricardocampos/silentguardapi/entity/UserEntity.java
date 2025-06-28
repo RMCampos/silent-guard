@@ -9,6 +9,11 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Data;
 
+/**
+ * Entity representing a user in the Silent Guard application. This entity stores user information
+ * such as email, last check-in time, break days, and timestamps for creation, update, and
+ * disabling.
+ */
 @Data
 @Entity
 @Table(name = "sg_users")

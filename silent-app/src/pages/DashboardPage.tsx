@@ -14,6 +14,14 @@ type Props = {
 
 const emptyMessage: Message = { id: 0, subject: '', content: '', daysToTrigger: 30, recipients: [], active: true };
 
+/**
+ * DashboardPage component displays the user's dashboard with options to manage messages.
+ * It includes functionality to create, edit, delete, and toggle the status of messages.
+ * The user must be authenticated to access this page.
+ *
+ * @param props - The props for the DashboardPage component
+ * @returns The rendered DashboardPage component
+ */
 const DashboardPage: React.FC<Props> = (props) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -23,6 +31,9 @@ const DashboardPage: React.FC<Props> = (props) => {
   const { user, isAuthenticated, logout } = useAuth0();
   const { accessToken } = useToken();
 
+  /**
+   * Handles the saving of a message, either creating a new one or updating an existing one.
+   */
   const handleSaveMessage = async () => {
     if (editingMessage) {
       try {
@@ -47,6 +58,12 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   };
 
+  /**
+   * Handles the deletion of a message after user confirmation.
+   * Displays a confirmation dialog before proceeding with the deletion.
+   *
+   * @param id - The ID of the message to be deleted
+   */
   const handleDeleteMessage = async (id: number) => {
     const willDelete = await swal({
       title: "Are you sure?",
@@ -54,7 +71,7 @@ const DashboardPage: React.FC<Props> = (props) => {
       icon: 'warning',
       dangerMode: true,
       closeOnEsc: true,
-      buttons:["No", "Yes"],
+      buttons: ["No", "Yes"],
     });
 
     if (willDelete) {
@@ -73,6 +90,10 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   };
 
+  /**
+   * Fetches all messages from the API and updates the state.
+   * This function is called when the component mounts and whenever the user validation status changes.
+   */
   const fetchAllMessages = useCallback(async () => {
     if (userValidated) {
       try {
@@ -84,6 +105,12 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   }, [userValidated, accessToken]);
 
+  /**
+   * Toggles the active status of a message by its ID.
+   * If the message is currently active, it will be deactivated and vice versa.
+   *
+   * @param id - The ID of the message to toggle
+   */
   const toggleMessageStatus = async (id: number) => {
     const messageToActivate = messages.filter(msg => msg.id === id);
 
@@ -100,6 +127,10 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   };
 
+  /**
+   * Validates the user by checking if they are authenticated and signing them in or up if necessary.
+   * If the user is invalid, it triggers a page change.
+   */
   const validateUser = useCallback(async () => {
     try {
       await signInOrSignUpUser(accessToken)
@@ -117,6 +148,12 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
   }, [props, accessToken]);
 
+  /**
+   * Creates a footer message string for each message, including the trigger days, last check-in, and next reminder.
+   *
+   * @param message - The message object containing details for the footer
+   * @returns A formatted string with the footer information
+   */
   const createFooterMessage = (message: Message): string => {
     const parts: string[] = [];
     parts.push(`Trigger every ${message.daysToTrigger} day(s); `);
@@ -130,6 +167,10 @@ const DashboardPage: React.FC<Props> = (props) => {
     return parts.join('');
   };
 
+  /**
+   * Handles user logout by calling the Auth0 logout function with the return URL.
+   * This will redirect the user to the home page after logging out.
+   */
   const handleLogout = async () => {
     logout({
       logoutParams: {
@@ -311,7 +352,7 @@ const DashboardPage: React.FC<Props> = (props) => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
                         {createFooterMessage(message)}
-                        
+
                       </span>
                       <div className="flex space-x-2">
                         <button

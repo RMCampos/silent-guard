@@ -14,6 +14,10 @@ const LandingPage: React.FC = () => {
   const [confirmationDone, setConfirmationDone] = useState<boolean>(false);
   const { loginWithRedirect } = useAuth0();
 
+  /**
+   * Initiates the login process by redirecting the user to the Auth0 login page.
+   * It requests the 'openid', 'profile', and 'email' scopes, and sets the audience to the API.
+   */
   const doSignIn = (): void => {
     loginWithRedirect({
       authorizationParams: {
@@ -23,6 +27,10 @@ const LandingPage: React.FC = () => {
     });
   }
 
+  /**
+   * Checks the URL for a confirmation ID and validates it.
+   * If a confirmation ID is found, it sends a request to the API to confirm the check-in.
+   */
   const checkForConfirmationId = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const confirmation = urlParams.get('confirmation');

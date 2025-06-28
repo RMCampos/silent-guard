@@ -3,7 +3,11 @@ package br.dev.ricardocampos.silentguardapi.util;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-/** This class provides method to handle UUIDs. */
+/**
+ * Utility class for generating UUIDs based on names, specifically for recipient emails.
+ * This class provides methods to generate a unique UUID for a given email address using
+ * the SHA-1 hashing algorithm and a predefined namespace.
+ */
 public class UuidUtil {
   private final UUID namespaceUrl = UUID.fromString("6ba7b811-9dad-11d1-80b4-00c04fd430c8");
 

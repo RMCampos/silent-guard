@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
+/** Service for managing persistent reminders. */
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -31,6 +32,10 @@ public class PersistentReminderService {
 
   private static final Map<String, ScheduledFuture<?>> activeTasks = new ConcurrentHashMap<>();
 
+  /**
+   * Restore all active scheduled reminders on application startup. This method will fetch all
+   * messages that are not disabled and schedule them for checking.
+   */
   @PostConstruct
   public void restoreSchedulesOnStartup() {
     log.info("Restoring scheduled reminders, if any");
@@ -43,26 +48,20 @@ public class PersistentReminderService {
     log.info("Restored {} scheduled reminders on startup", activeReminders.size());
   }
 
+  /**
+   * Schedule a check-in message to be sent periodically based on the message's span days. This
+   * method will create a new schedule if it doesn't exist, or update the existing one.
+   *
+   * @param message The message entity containing the details for the check-in reminder.
+   */
   public void scheduleCheckingMessage(MessageEntity message) {
     // TODO: handle update or existing messages/schedules
 
-    // Calculate delay until next reminder
-
-    // Prod:
-    // Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
-
-    // Dev:
-    Duration initialDelay =
-        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusMinutes(5));
-
-    // Prod:
-    // Duration interval = Duration.ofDays(message.getSpanDays());
-
-    // Dev:
-    Duration interval = Duration.ofMinutes(5);
+    Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
+    Duration interval = Duration.ofDays(message.getSpanDays());
 
     if (initialDelay.isNegative()) {
-      initialDelay = Duration.ZERO; // Send immediately if overdue
+      initialDelay = Duration.ZERO;
     }
 
     log.info(
@@ -84,7 +83,6 @@ public class PersistentReminderService {
       List<String> recipients = Arrays.asList(message.getTargets().split(";"));
       mailgunEmailService.sendCheckInRequest(recipients, message.getReminderUuid().toString());
 
-      // Update database with last sent time
       messageRepository
           .findById(message.getId())
           .ifPresent(
@@ -95,24 +93,25 @@ public class PersistentReminderService {
                 messageRepository.saveAndFlush(reminder);
               });
 
-      // Schedule HTML content to be sent if not confirmed
       scheduleContentMessage(message);
-
     } catch (Exception e) {
       log.error("Failed to send reminder for message id {}", message.getId(), e);
     }
   }
 
+  /**
+   * Schedule the content message to be sent 12 hours after the last check-in, if the user hasn't
+   * checked in again. This is a separate schedule from the check-in reminder. It will be scheduled
+   * only once, after the check-in reminder is sent. If the user checks in again, this schedule will
+   * be cancelled.
+   *
+   * @param message
+   */
   public void scheduleContentMessage(MessageEntity message) {
     // TODO: handle update or existing messages/schedules
 
-    // Prod
-    // Duration initialDelay = Duration.between(LocalDateTime.now(),
-    // LocalDateTime.now().plusHours(12));
-
-    // Dev:
     Duration initialDelay =
-        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusMinutes(2));
+        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusHours(12));
 
     log.info(
         "Scheduling content message id {} to be sent in {}, if not cancelled",
@@ -131,20 +130,16 @@ public class PersistentReminderService {
     try {
       log.info("Handling content message schedule for message id {}", message.getId());
 
-      // If time between now last checking is greater than 12 hours, send the content email
       MessageEntity messageOpt = messageRepository.findById(message.getId()).orElseThrow();
 
       LocalDateTime lastChecking = messageOpt.getLastCheckIn();
       if (Objects.isNull(lastChecking)) {
         lastChecking = LocalDateTime.now().plusYears(99);
       }
+
       Duration timePast = Duration.between(LocalDateTime.now(), lastChecking);
 
-      // Prod
-      // if (timePast.toHours() < 12) {
-
-      // Dev
-      if (timePast.toMinutes() < 2) {
+      if (timePast.toHours() < 12) {
         log.info("Skipping content message. User {} did the check in", message.getUserId());
         return;
       }
@@ -155,7 +150,6 @@ public class PersistentReminderService {
       mailgunEmailService.sendHtmlContentMessage(
           recipients, messageOpt.getSubject(), messageOpt.getContent());
 
-      // Update database disabling the current message
       messageRepository
           .findById(message.getId())
           .ifPresent(
@@ -173,6 +167,13 @@ public class PersistentReminderService {
     }
   }
 
+  /**
+   * Cancel any existing scheduled task for the given message ID and type (check-in or content).
+   * This is useful to prevent duplicate tasks from running if the user checks in again.
+   *
+   * @param messageId The ID of the message to cancel the task for.
+   * @param isContent True if the task is for content, false if it's for check-in.
+   */
   public void cancelExistingTask(Long messageId, boolean isContent) {
     log.info("Canceling existing task: {} for content {}", messageId, isContent);
     ScheduledFuture<?> existingTask = activeTasks.remove(createScheduleId(messageId, isContent));

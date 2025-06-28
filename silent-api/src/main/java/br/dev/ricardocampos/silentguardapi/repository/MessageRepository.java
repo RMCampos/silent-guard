@@ -6,6 +6,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Repository interface for managing MessageEntity objects in the database. Provides methods to
+ * perform CRUD operations and custom queries related to messages.
+ */
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
   List<MessageEntity> findAllByUserId(Long userId);

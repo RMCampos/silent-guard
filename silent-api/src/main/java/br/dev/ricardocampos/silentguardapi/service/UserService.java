@@ -12,6 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for managing user-related operations, including user registration and sign-in. This
+ * service checks if a user is registered and updates their last check-in time.
+ */
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -23,6 +27,12 @@ public class UserService {
 
   private final BearerTokenHolder bearerTokenHolder;
 
+  /**
+   * Checks if the user is registered or signs them up if they are not. If the user is already
+   * registered, it updates their last check-in time.
+   *
+   * @throws InvalidUserException if the user information is invalid or missing.
+   */
   public void signUpOrSignUser() {
     Optional<UserInfoDto> userDto = authService.getUserInfo(bearerTokenHolder.getToken());
     if (userDto.isEmpty()

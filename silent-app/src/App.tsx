@@ -4,6 +4,13 @@ import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import { useAuth0 } from '@auth0/auth0-react';
 
+/**
+ * The main App component that manages the application state and renders the appropriate page.
+ * It uses Auth0 for authentication and conditionally renders the landing or dashboard page based on
+ * the authentication status.
+ *
+ * @returns {React.ReactNode} The rendered App component.
+ */
 const App: React.FC = (): React.ReactNode => {
   const [currentPage, setCurrentPage] = useState<string>('landing');
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
