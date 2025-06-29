@@ -55,7 +55,7 @@ const LandingPage: React.FC = () => {
   useEffect(() => {}, [confirmationDone]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header */}
       <header className="px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">

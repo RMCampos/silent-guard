@@ -6,6 +6,8 @@ services:
     depends_on:
       database:
         condition: service_started
+    env_file:
+      ./silent-api/.env
     environment:
       AUTH_DOMAIN: ${AUTH_DOMAIN}
       API_IDENTIFIER: ${API_IDENTIFIER}
