@@ -1,4 +1,4 @@
-name: Main Server
+name: API - Main
 
 on:
   workflow_dispatch:
