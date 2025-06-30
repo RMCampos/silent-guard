@@ -8,7 +8,7 @@ COPY src ./src
 COPY .mvn/ ./.mvn
 
 # Build
-RUN ./mvnw -B package -Pnative -DskipTests
+RUN ./mvnw -B package -Pnative -DskipTests -Dspring.profiles.active=prod
 
 ### Deployer
 FROM debian:12.11-slim AS deploy
