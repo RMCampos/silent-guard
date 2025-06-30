@@ -1,2 +1,7 @@
 .vscode
 .idea
+# SSL certificates
+certs/
+*.key
+*.crt
+*.pem

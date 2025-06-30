@@ -9,15 +9,12 @@ services:
     env_file:
       ./silent-api/.env
     environment:
-      AUTH_DOMAIN: ${AUTH_DOMAIN}
-      API_IDENTIFIER: ${API_IDENTIFIER}
       POSTGRES_DB: sg
       POSTGRES_HOST: database
       POSTGRES_USER: sg
       POSTGRES_PASSWORD: default
       POSTGRES_PORT: 5432
-      CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:5173
-      MAILGUN_APIKEY: ${MAILGUN_APIKEY}
+      CORS_ALLOWED_ORIGINS: https://silentguard-local.ricardocampos.dev.br:5173
       TARGET_ENV: development
       API_LOGGING_LEVEL: INFO
     ports:
