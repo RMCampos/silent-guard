@@ -17,6 +17,7 @@ services:
       CORS_ALLOWED_ORIGINS: https://silentguard-local.ricardocampos.dev.br:5173
       TARGET_ENV: development
       API_LOGGING_LEVEL: INFO
+      SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8443:8443"
       - "5005:5005"
