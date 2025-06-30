@@ -40,7 +40,8 @@ public class CorsConfig implements WebMvcConfigurer {
               "X-Frame-Options",
               "X-XSS-Protection",
               "Content-Security-Policy")
-          .allowedMethods("GET", "PUT", "POST", "DELETE", "OPTIONS", "HEAD", "PATCH");
+          .allowedMethods("GET", "PUT", "POST", "DELETE", "OPTIONS", "HEAD", "PATCH")
+          .allowCredentials(true);
     }
   }
 }

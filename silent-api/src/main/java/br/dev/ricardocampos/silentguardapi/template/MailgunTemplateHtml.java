@@ -14,7 +14,7 @@ public class MailgunTemplateHtml implements MailgunTemplate {
   private String carbonCopy;
 
   /**
-   * Returns the html code of the template. This code is used to render the email content in HTML
+   * Returns the HTML code of the template. This code is used to render the email content in HTML
    * format.
    */
   @Override

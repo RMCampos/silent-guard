@@ -7,16 +7,16 @@ import java.util.Objects;
 
 /**
  * Utility class for formatting time-related information. This class provides methods to format a
- * past time into a human-readable "time ago" format and to format a duration into a string
+ * pastime into a human-readable "time ago" format and to format a duration into a string
  * representation.
  */
 public class FormatUtil {
 
   /**
-   * Formats a given past time into a human-readable "time ago" format.
+   * Formats a given pastime into a human-readable "time ago" format.
    *
-   * @param pastTime the past time to format
-   * @return a string representing the time elapsed since the past time, or "none" if the input is
+   * @param pastTime the pastime to format
+   * @return a string representing the time elapsed since the pastime, or "none" if the input is
    *     null
    */
   public static String formatTimeAgo(LocalDateTime pastTime) {
@@ -75,7 +75,7 @@ public class FormatUtil {
     if (days > 0) result.append(days).append("d ");
     if (hours > 0) result.append(hours).append("h ");
     if (minutes > 0) result.append(minutes).append("m ");
-    if (seconds > 0 || result.length() == 0) result.append(seconds).append("s");
+    if (seconds > 0 || result.isEmpty()) result.append(seconds).append("s");
 
     return result.toString().trim();
   }

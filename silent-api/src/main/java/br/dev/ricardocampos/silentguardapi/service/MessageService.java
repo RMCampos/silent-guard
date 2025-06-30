@@ -48,10 +48,10 @@ public class MessageService {
    * @return a list of MessageDto objects representing the user's messages.
    */
   public List<MessageDto> getMessages() {
-    Optional<UserEntity> user = getUserEntity();
-    log.info("Getting all messages for user {}", user.get().getId());
+    UserEntity user = getUserEntity();
+    log.info("Getting all messages for user {}", user.getId());
 
-    List<MessageEntity> messageList = messageRepository.findAllByUserId(user.get().getId());
+    List<MessageEntity> messageList = messageRepository.findAllByUserId(user.getId());
     log.info("{} message(s) found.", messageList.size());
 
     return messageList.stream().map(MessageDto::fromEntity).toList();
@@ -65,15 +65,14 @@ public class MessageService {
    */
   @Transactional
   public MessageDto createMessage(MessageDto messageDto) {
-    Optional<UserEntity> user = getUserEntity();
-    log.info("Creating message for user {}", user.get().getId());
+    UserEntity user = getUserEntity();
+    log.info("Creating message for user {}", user.getId());
 
-    Set<String> uniqueEmails = new HashSet<>();
-    uniqueEmails.addAll(messageDto.recipients());
+    Set<String> uniqueEmails = new HashSet<>(messageDto.recipients());
 
     String targets = uniqueEmails.stream().map(String::trim).collect(Collectors.joining(";"));
     MessageEntity message = new MessageEntity();
-    message.setUserId(user.get().getId());
+    message.setUserId(user.getId());
     message.setSubject(messageDto.subject());
     message.setTargets(targets);
     message.setContent(messageDto.content());
@@ -86,7 +85,7 @@ public class MessageService {
     messageRepository.save(message);
     persistentReminderService.scheduleCheckingMessage(message);
 
-    log.info("Message created for user {}", user.get().getId());
+    log.info("Message created for user {}", user.getId());
 
     return MessageDto.fromEntity(message);
   }
@@ -99,8 +98,8 @@ public class MessageService {
    */
   @Transactional
   public void updateMessage(Long id, MessageDto messageDto) {
-    Optional<UserEntity> user = getUserEntity();
-    log.info("Updating message for user {}", user.get().getId());
+    UserEntity user = getUserEntity();
+    log.info("Updating message for user {}", user.getId());
 
     Optional<MessageEntity> messageOptional = messageRepository.findById(id);
     if (messageOptional.isEmpty()) {
@@ -130,7 +129,7 @@ public class MessageService {
 
     messageRepository.save(messageFromDb);
 
-    log.info("Message updated for user {}", user.get().getId());
+    log.info("Message updated for user {}", user.getId());
 
     if (messageDto.active()) {
       persistentReminderService.scheduleCheckingMessage(messageFromDb);
@@ -144,8 +143,8 @@ public class MessageService {
    */
   @Transactional
   public void deleteMessage(Long id) {
-    Optional<UserEntity> user = getUserEntity();
-    log.info("Deleting message for user {}", user.get().getId());
+    UserEntity user = getUserEntity();
+    log.info("Deleting message for user {}", user.getId());
 
     Optional<MessageEntity> messageOptional = messageRepository.findById(id);
     if (messageOptional.isEmpty()) {
@@ -153,7 +152,7 @@ public class MessageService {
     }
 
     messageRepository.delete(messageOptional.get());
-    log.info("Message updated for user {}", user.get().getId());
+    log.info("Message deleted for user {}", user.getId());
 
     persistentReminderService.cancelExistingTask(id, true);
     persistentReminderService.cancelExistingTask(id, false);
@@ -189,7 +188,7 @@ public class MessageService {
     }
   }
 
-  private Optional<UserEntity> getUserEntity() {
+  private UserEntity getUserEntity() {
     Optional<UserInfoDto> userDto = authService.getUserInfo(bearerTokenHolder.getToken());
     if (userDto.isEmpty()
         || Objects.isNull(userDto.get().email())
@@ -197,6 +196,11 @@ public class MessageService {
       throw new InvalidUserException();
     }
 
-    return userRepository.findByEmail(userDto.get().email());
+    Optional<UserEntity> userOptional = userRepository.findByEmail(userDto.get().email());
+    if (userOptional.isEmpty()) {
+      log.error("User not found for the authenticated token");
+      throw new InvalidUserException();
+    }
+    return userOptional.get();
   }
 }

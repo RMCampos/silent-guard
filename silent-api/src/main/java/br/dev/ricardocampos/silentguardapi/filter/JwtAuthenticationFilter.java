@@ -74,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       jwtToken = authorizationHeader.substring(7);
     }
 
-    if (Objects.isNull(jwtToken) || jwtToken.isBlank()) {
+    if (jwtToken.isBlank()) {
       throw new ServletException("Invalid token");
     }
 

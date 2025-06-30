@@ -77,7 +77,7 @@ public class AuthService {
       }
 
     } catch (HttpClientErrorException e) {
-      e.printStackTrace();
+      log.error("HttpClientErrorException when fetching user info: {}", e.getMessage());
     }
 
     return Optional.empty();

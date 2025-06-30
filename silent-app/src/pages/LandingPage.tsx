@@ -3,7 +3,7 @@ import { Clock, Mail, Shield } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { checkInConfirmation } from '../services/apiService';
 import { handleAndDisplayError } from '../utils/Utils';
-import { env } from '../env';
+import Footer from "../components/Footer.tsx";
 
 /**
  * Renders the LandingPage component.
@@ -24,7 +24,7 @@ const LandingPage: React.FC = () => {
         scope: "openid profile email",
         audience: "http://localhost:8080"
       }
-    });
+    }).then(() => {});
   }
 
   /**
@@ -49,7 +49,10 @@ const LandingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    checkForConfirmationId();
+    async function callAsync() {
+      await checkForConfirmationId();
+    }
+    callAsync().then(() => {});
   }, []);
 
   useEffect(() => {}, [confirmationDone]);
@@ -83,13 +86,13 @@ const LandingPage: React.FC = () => {
                 Check-in Confirmed
               </h2>
               
-              <p className="text-lg text-gray-300 mb-6">
+              <p className="text-lg text-slate-300 mb-6">
                 Your check-in has been successfully recorded. Your Silent Guard monitoring 
                 period has been reset and your messages will remain secure.
               </p>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 mb-6">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-slate-300">
                   <span className="text-blue-400 font-semibold">Next check-in required by:</span>
                   <br />
                   <span className="text-white text-base font-medium">
@@ -124,7 +127,7 @@ const LandingPage: React.FC = () => {
             <h2 className="text-5xl font-bold text-white mb-6">
               Your Digital <span className="text-blue-400">Safety Net</span>
             </h2>
-            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto">
               Silent Guard is a dead man's switch service that automatically sends important messages 
               when you're unable to check in. Protect your loved ones with crucial information.
             </p>
@@ -133,19 +136,19 @@ const LandingPage: React.FC = () => {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <Clock className="w-12 h-12 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Automatic Monitoring</h3>
-                <p className="text-gray-300">Set custom time intervals. If you don't check in, your messages are automatically sent.</p>
+                <p className="text-slate-300">Set custom time intervals. If you don't check in, your messages are automatically sent.</p>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <Mail className="w-12 h-12 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Secure Delivery</h3>
-                <p className="text-gray-300">Encrypted messages delivered to your specified recipients when needed most.</p>
+                <p className="text-slate-300">Encrypted messages delivered to your specified recipients when needed most.</p>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <Shield className="w-12 h-12 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Complete Privacy</h3>
-                <p className="text-gray-300">Your messages are encrypted and only accessible when the conditions are met.</p>
+                <p className="text-slate-300">Your messages are encrypted and only accessible when the conditions are met.</p>
               </div>
             </div>
 
@@ -159,14 +162,7 @@ const LandingPage: React.FC = () => {
         </main>
       )}
 
-      {/* Footer */}
-      <footer className="px-6 py-4 border-t border-white/20">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400 text-sm">
-            Silent Guard {env.VITE_BUILD}
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

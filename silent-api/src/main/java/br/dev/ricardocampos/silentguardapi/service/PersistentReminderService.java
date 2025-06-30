@@ -50,7 +50,7 @@ public class PersistentReminderService {
 
   /**
    * Schedule a check-in message to be sent periodically based on the message's span days. This
-   * method will create a new schedule if it doesn't exist, or update the existing one.
+   * method will create a new schedule if it doesn't exist or update the existing one.
    *
    * @param message The message entity containing the details for the check-in reminder.
    */
@@ -100,12 +100,12 @@ public class PersistentReminderService {
   }
 
   /**
-   * Schedule the content message to be sent 12 hours after the last check-in, if the user hasn't
+   * Schedule the content message to be sent 12 hours after the last check-in if the user hasn't
    * checked in again. This is a separate schedule from the check-in reminder. It will be scheduled
    * only once, after the check-in reminder is sent. If the user checks in again, this schedule will
-   * be cancelled.
+   * be canceled.
    *
-   * @param message
+   * @param message The {@link MessageEntity} instance containing the details to be sent
    */
   public void scheduleContentMessage(MessageEntity message) {
     // TODO: handle update or existing messages/schedules
@@ -116,8 +116,7 @@ public class PersistentReminderService {
     log.info(
         "Scheduling content message id {} to be sent in {}, if not cancelled",
         message.getId(),
-        FormatUtil.formatDuration(initialDelay),
-        message.getSpanDays());
+        FormatUtil.formatDuration(initialDelay));
 
     ScheduledFuture<?> future =
         taskScheduler.schedule(
