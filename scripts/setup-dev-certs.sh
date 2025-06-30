@@ -1,6 +1,6 @@
 #!/bin/bash
 # Run from inside the project root dir
-if [ ! -f "certs/localhost.key" ]; then
+if [ ! -f "certs/silentguard-local.key" ]; then
   mkdir -p certs
   openssl req -x509 -newkey rsa:4096 \
     -keyout certs/silentguard-local.key \

@@ -9,8 +9,8 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     https: {
-      key: fs.readFileSync('./certs/localhost.key'),
-      cert: fs.readFileSync('./certs/localhost.crt'),
+      key: fs.readFileSync('../certs/silentguard-local.key'),
+      cert: fs.readFileSync('../certs/silentguard-local.crt'),
     },
     allowedHosts: ['silentguard-local.ricardocampos.dev.br']
   },
