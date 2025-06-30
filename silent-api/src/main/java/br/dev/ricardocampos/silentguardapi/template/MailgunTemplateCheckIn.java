@@ -3,6 +3,7 @@ package br.dev.ricardocampos.silentguardapi.template;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Setter;
 
 /**
  * Represents a Mailgun template for sending check-in requests. This template includes a link for
@@ -10,8 +11,8 @@ import java.util.Optional;
  */
 public class MailgunTemplateCheckIn implements MailgunTemplate {
 
-  private String templateName = "check-in request";
-  private String carbonCopy;
+  @Setter private String carbonCopy;
+
   private final Map<String, Object> props;
 
   /** Constructs a MailgunTemplateCheckIn instance with an empty properties map. */
@@ -22,8 +23,7 @@ public class MailgunTemplateCheckIn implements MailgunTemplate {
   /**
    * Constructs a MailgunTemplateCheckIn instance with the specified template name and properties.
    *
-   * @param templateName the name of the template
-   * @param props the properties to be included in the template
+   * @param checkInLink the check-in link to the user
    */
   public void setCheckInLink(String checkInLink) {
     props.put("CHECK_IN_LINK", checkInLink);
@@ -36,7 +36,7 @@ public class MailgunTemplateCheckIn implements MailgunTemplate {
    */
   @Override
   public String getName() {
-    return templateName;
+    return "check-in request";
   }
 
   /**
@@ -49,15 +49,6 @@ public class MailgunTemplateCheckIn implements MailgunTemplate {
   @Override
   public Map<String, Object> getVariables() {
     return props;
-  }
-
-  /**
-   * Sets the carbon copy recipient for the email.
-   *
-   * @param carbonCopy the email address to be added as a carbon copy recipient
-   */
-  public void setCarbonCopy(String carbonCopy) {
-    this.carbonCopy = carbonCopy;
   }
 
   /**

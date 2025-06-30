@@ -57,7 +57,6 @@ public class SecurityConfig {
   }
 
   private Converter<Jwt, AbstractAuthenticationToken> converter() {
-    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-    return converter;
+    return new JwtAuthenticationConverter();
   }
 }

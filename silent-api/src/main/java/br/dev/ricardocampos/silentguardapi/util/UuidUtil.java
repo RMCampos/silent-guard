@@ -14,7 +14,7 @@ public class UuidUtil {
   /**
    * Generated a unique UUID to a given email.
    *
-   * @param email The email to create the UUID.
+   * @param recipients The email to create the UUID.
    * @return The generated UUID.
    */
   public UUID generateRecipientUuid(String recipients) {
@@ -36,7 +36,7 @@ public class UuidUtil {
     sha1[6] &= 0x0f;
     sha1[6] |= 0x50;
     sha1[8] &= 0x3f;
-    sha1[8] |= 0x80;
+    sha1[8] |= (byte) 0x80;
 
     return bytesToUuid(sha1);
   }
