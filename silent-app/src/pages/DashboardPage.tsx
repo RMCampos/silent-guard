@@ -7,6 +7,7 @@ import { createMessage, deleteMessage, getMessages, signInOrSignUpUser, updateMe
 import { useToken } from '../context/TokenContext';
 import { handleAndDisplayError } from '../utils/Utils';
 import swal from 'sweetalert';
+import Footer from "../components/Footer.tsx";
 
 type Props = {
   setPageChanged: () => void;
@@ -387,6 +388,7 @@ const DashboardPage: React.FC<Props> = (props) => {
             ))}
           </div>
         </main>
+        <Footer />
       </div>
       <AccountModal
         show={showAccountModal}
