@@ -40,7 +40,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         const cleanEmails = editingMessage.recipients.map(email => email.trim());
         await updateMessage(accessToken, { ...editingMessage, recipients: cleanEmails });
         setEditingMessage(null);
-        fetchAllMessages();
+        await fetchAllMessages();
       }
       catch (e: unknown) {
         handleAndDisplayError(e);
@@ -50,7 +50,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         const cleanEmails = newMessage.recipients.map(email => email.trim());
         await createMessage(accessToken, { ...newMessage, recipients: cleanEmails });
         setNewMessage(emptyMessage);
-        fetchAllMessages();
+        await fetchAllMessages();
       }
       catch (e: unknown) {
         handleAndDisplayError(e);
@@ -81,7 +81,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         try {
           await deleteMessage(accessToken, messageToDelete[0].id);
           setEditingMessage(null);
-          fetchAllMessages();
+          await fetchAllMessages();
         }
         catch (e: unknown) {
           handleAndDisplayError(e);
@@ -119,7 +119,7 @@ const DashboardPage: React.FC<Props> = (props) => {
         messageToActivate[0].active = !messageToActivate[0].active;
         await updateMessage(accessToken, messageToActivate[0]);
         setEditingMessage(null);
-        fetchAllMessages();
+        await fetchAllMessages();
       }
       catch (e: unknown) {
         handleAndDisplayError(e);
@@ -172,7 +172,7 @@ const DashboardPage: React.FC<Props> = (props) => {
    * This will redirect the user to the home page after logging out.
    */
   const handleLogout = async () => {
-    logout({
+    await logout({
       logoutParams: {
         returnTo: window.location.origin
       }
@@ -185,33 +185,33 @@ const DashboardPage: React.FC<Props> = (props) => {
     }
 
     if (!userValidated) {
-      validateUser();
+      validateUser().then(() => {});
     }
 
-    fetchAllMessages();
+    fetchAllMessages().then(() => {});
   }, [isAuthenticated, props, accessToken, userValidated, validateUser, fetchAllMessages]);
 
   return (
     <Fragment>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b px-6 py-4">
+        <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Shield className="w-8 h-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Silent Guard</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Silent Guard</h1>
             </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowAccountModal(true)}
-                className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                className="flex items-center space-x-2 text-slate-700 hover:text-slate-900"
               >
                 <User className="w-5 h-5" />
                 <span>Account</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                className="flex items-center space-x-2 text-slate-700 hover:text-slate-900"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>
@@ -223,27 +223,27 @@ const DashboardPage: React.FC<Props> = (props) => {
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-6 py-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Messages</h2>
-            <p className="text-gray-600">Manage your dead man's switch messages and monitoring settings.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Your Messages</h2>
+            <p className="text-slate-600">Manage your dead man's switch messages and monitoring settings.</p>
           </div>
 
           {/* New Message Form */}
-          <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Create new scheduled message</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">Create new scheduled message</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <input
                 type="text"
                 placeholder="Message subject"
                 value={newMessage.subject}
                 onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
               />
               <input
                 type="email"
                 placeholder="Recipient email (comma for multiple)"
                 value={newMessage.recipients}
                 onChange={(e) => setNewMessage({ ...newMessage, recipients: e.target.value.split(',') })}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
               />
             </div>
             <div className="mt-4">
@@ -252,25 +252,26 @@ const DashboardPage: React.FC<Props> = (props) => {
                 rows={4}
                 value={newMessage.content}
                 onChange={(e) => setNewMessage({ ...newMessage, content: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
               />
             </div>
             <div className="mt-4 flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Trigger every (days):</label>
+                <label className="text-sm font-medium text-slate-700">Trigger every (days):</label>
                 <input
                   type="number"
+                  placeholder="0"
                   min="1"
                   max="365"
                   value={newMessage.daysToTrigger}
                   onChange={(e) => setNewMessage({ ...newMessage, daysToTrigger: parseInt(e.target.value) })}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                 />
               </div>
               <button
                 onClick={handleSaveMessage}
                 disabled={!newMessage.subject || !newMessage.content || !newMessage.recipients}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Message</span>
@@ -281,37 +282,37 @@ const DashboardPage: React.FC<Props> = (props) => {
           {/* Messages List */}
           <div className="grid gap-6">
             {messages.map((message) => (
-              <div key={message.id} className="bg-white rounded-xl shadow-sm border p-6">
+              <div key={message.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 {editingMessage?.id === message.id ? (
                   <div className="space-y-4">
                     <input
                       type="text"
                       value={editingMessage.subject}
                       onChange={(e) => setEditingMessage({ ...editingMessage, subject: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                     />
                     <input
                       type="email"
                       value={editingMessage.recipients.join(', ')}
                       onChange={(e) => setEditingMessage({ ...editingMessage, recipients: e.target.value.split(',') })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                     />
                     <textarea
                       rows={4}
                       value={editingMessage.content}
                       onChange={(e) => setEditingMessage({ ...editingMessage, content: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                     />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-gray-700">Days:</label>
+                        <label className="text-sm font-medium text-slate-700">Days:</label>
                         <input
                           type="number"
                           min="1"
                           max="365"
                           value={editingMessage.daysToTrigger}
                           onChange={(e) => setEditingMessage({ ...editingMessage, daysToTrigger: parseInt(e.target.value) })}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                         />
                       </div>
                       <div className="flex space-x-2">
@@ -324,7 +325,7 @@ const DashboardPage: React.FC<Props> = (props) => {
                         </button>
                         <button
                           onClick={() => setEditingMessage(null)}
-                          className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors"
+                          className="flex items-center space-x-1 bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg transition-colors"
                         >
                           <X className="w-4 h-4" />
                           <span>Cancel</span>
@@ -336,21 +337,21 @@ const DashboardPage: React.FC<Props> = (props) => {
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900">{message.subject}</h3>
-                        <p className="text-sm text-gray-600">To: {message.recipients.join(', ')}</p>
+                        <h3 className="text-xl font-semibold text-slate-900">{message.subject}</h3>
+                        <p className="text-sm text-slate-600">To: {message.recipients.join(', ')}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${message.active
                           ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                          : 'bg-slate-100 text-slate-800'
                           }`}>
                           {message.active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </div>
-                    <p className="text-gray-700 mb-4">{message.content}</p>
+                    <p className="text-slate-700 mb-4">{message.content}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-slate-600">
                         {createFooterMessage(message)}
 
                       </span>
