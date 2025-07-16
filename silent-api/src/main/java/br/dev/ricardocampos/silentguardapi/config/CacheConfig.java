@@ -52,9 +52,6 @@ public class CacheConfig {
         .expireAfterWrite(ttlMinutes, TimeUnit.MINUTES)
         .expireAfterAccess(accessTtlMinutes, TimeUnit.MINUTES)
         .recordStats()
-        .removalListener(
-            (key, value, cause) -> {
-              log.info("Cache entry removed: {}", cause);
-            });
+        .removalListener((key, value, cause) -> log.info("Cache entry removed: {}", cause));
   }
 }

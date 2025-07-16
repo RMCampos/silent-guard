@@ -1,7 +1,9 @@
 package br.dev.ricardocampos.silentguardapi.service;
 
 import br.dev.ricardocampos.silentguardapi.entity.MessageEntity;
+import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
+import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
 import br.dev.ricardocampos.silentguardapi.util.FormatUtil;
 import io.jsonwebtoken.lang.Arrays;
 import jakarta.annotation.PostConstruct;
@@ -13,6 +15,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
@@ -30,6 +34,10 @@ public class PersistentReminderService {
 
   private final MailgunEmailService mailgunEmailService;
 
+  private final UserRepository userRepository;
+
+  private static final Integer WINDOW_CHECKIN_INTERVAL = 24;
+
   private static final Map<String, ScheduledFuture<?>> activeTasks = new ConcurrentHashMap<>();
 
   /**
@@ -41,8 +49,14 @@ public class PersistentReminderService {
     log.info("Restoring scheduled reminders, if any");
     List<MessageEntity> activeReminders = messageRepository.findByDisabledAtNull();
 
+    List<Long> userIds = activeReminders.stream().map(MessageEntity::getUserId).toList();
+    List<UserEntity> users = userRepository.findAllById(userIds);
+    Map<Long, UserEntity> userMap =
+        users.stream().collect(Collectors.toMap(UserEntity::getId, Function.identity()));
+
     for (MessageEntity message : activeReminders) {
-      scheduleCheckingMessage(message);
+      UserEntity user = userMap.get(message.getUserId());
+      scheduleCheckingMessage(user.getEmail(), message);
     }
 
     log.info("Restored {} scheduled reminders on startup", activeReminders.size());
@@ -52,11 +66,10 @@ public class PersistentReminderService {
    * Schedule a check-in message to be sent periodically based on the message's span days. This
    * method will create a new schedule if it doesn't exist or update the existing one.
    *
+   * @param userEmail The user emails to send the checking message to.
    * @param message The message entity containing the details for the check-in reminder.
    */
-  public void scheduleCheckingMessage(MessageEntity message) {
-    // TODO: handle update or existing messages/schedules
-
+  public void scheduleCheckingMessage(String userEmail, MessageEntity message) {
     Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
     Duration interval = Duration.ofDays(message.getSpanDays());
 
@@ -72,15 +85,17 @@ public class PersistentReminderService {
 
     ScheduledFuture<?> future =
         taskScheduler.scheduleWithFixedDelay(
-            () -> handleReminderAndUpdateDb(message), Instant.now().plus(initialDelay), interval);
+            () -> handleReminderAndUpdateDb(userEmail, message),
+            Instant.now().plus(initialDelay),
+            interval);
 
     activeTasks.put(createScheduleId(message.getId(), false), future);
   }
 
-  private void handleReminderAndUpdateDb(MessageEntity message) {
+  private void handleReminderAndUpdateDb(String userEmail, MessageEntity message) {
     try {
       log.info("Handling check-in message schedule for message id {}", message.getId());
-      List<String> recipients = Arrays.asList(message.getTargets().split(";"));
+      List<String> recipients = Arrays.asList(new String[] {userEmail});
       mailgunEmailService.sendCheckInRequest(recipients, message.getReminderUuid().toString());
 
       messageRepository
@@ -100,7 +115,7 @@ public class PersistentReminderService {
   }
 
   /**
-   * Schedule the content message to be sent 12 hours after the last check-in if the user hasn't
+   * Schedule the content message to be sent 24 hours after the last check-in if the user hasn't
    * checked in again. This is a separate schedule from the check-in reminder. It will be scheduled
    * only once, after the check-in reminder is sent. If the user checks in again, this schedule will
    * be canceled.
@@ -108,10 +123,9 @@ public class PersistentReminderService {
    * @param message The {@link MessageEntity} instance containing the details to be sent
    */
   public void scheduleContentMessage(MessageEntity message) {
-    // TODO: handle update or existing messages/schedules
-
     Duration initialDelay =
-        Duration.between(LocalDateTime.now(), LocalDateTime.now().plusHours(12));
+        Duration.between(
+            LocalDateTime.now(), LocalDateTime.now().plusHours(WINDOW_CHECKIN_INTERVAL));
 
     log.info(
         "Scheduling content message id {} to be sent in {}, if not cancelled",
@@ -138,7 +152,7 @@ public class PersistentReminderService {
 
       Duration timePast = Duration.between(LocalDateTime.now(), lastChecking);
 
-      if (timePast.toHours() < 12) {
+      if (timePast.toHours() < WINDOW_CHECKIN_INTERVAL) {
         log.info("Skipping content message. User {} did the check in", message.getUserId());
         return;
       }
@@ -181,12 +195,16 @@ public class PersistentReminderService {
       boolean cancelled = existingTask.cancel(false); // false = don't interrupt if running
 
       if (cancelled) {
-        log.info("Successfully cancelled existing scheduled task for message {}", messageId);
+        log.info(
+            "Successfully cancelled existing scheduled task for message id {} and content {}",
+            messageId,
+            isContent);
       } else {
         log.warn(
-            "Failed to cancel existing reminder task for message {} - task may have already"
-                + " completed",
-            messageId);
+            "Failed to cancel existing reminder task for message id {} and content {} - task may have already"
+                + " completed or not scheduled yet",
+            messageId,
+            isContent);
       }
     } else {
       log.debug("No existing task found for message {} to cancel", messageId);
