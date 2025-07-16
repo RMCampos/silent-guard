@@ -83,7 +83,7 @@ public class MessageService {
     message.setReminderUuid(new UuidUtil().generateRecipientUuid(targets));
 
     messageRepository.save(message);
-    persistentReminderService.scheduleCheckingMessage(message);
+    persistentReminderService.scheduleCheckingMessage(user.getEmail(), message);
 
     log.info("Message created for user {}", user.getId());
 
@@ -131,8 +131,11 @@ public class MessageService {
 
     log.info("Message updated for user {}", user.getId());
 
+    persistentReminderService.cancelExistingTask(messageFromDb.getId(), true);
+    persistentReminderService.cancelExistingTask(messageFromDb.getId(), false);
+
     if (messageDto.active()) {
-      persistentReminderService.scheduleCheckingMessage(messageFromDb);
+      persistentReminderService.scheduleCheckingMessage(user.getEmail(), messageFromDb);
     }
   }
 
