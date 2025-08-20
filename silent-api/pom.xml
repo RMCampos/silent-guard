@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.3</version>
+    <version>3.5.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>br.dev.ricardocampos</groupId>
@@ -33,7 +33,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-    <hibernate.version>6.6.21.Final</hibernate.version>
+    <hibernate.version>6.6.25.Final</hibernate.version>
   </properties>
 
   <profiles>
@@ -118,17 +118,17 @@
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
-      <version>0.12.6</version>
+      <version>0.12.7</version>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <version>0.12.6</version>
+      <version>0.12.7</version>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId>
-      <version>0.12.6</version>
+      <version>0.12.7</version>
     </dependency>
 
     <!-- Caching -->
@@ -145,6 +145,14 @@
 
   <build>
     <plugins>
+      <!-- plugin to update dependencies -->
+      <!-- update with: './mvnw versions:use-latest-releases' -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.15.0</version> <!-- Use latest version -->
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
