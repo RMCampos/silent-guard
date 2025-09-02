@@ -1,23 +1,25 @@
 ---
 
 services:
-  silent-web:
-    container_name: silent-web
+  silent-app:
+    container_name: silent-app
     depends_on:
       silent-api:
         condition: service_healthy
     image: node:22.14-bookworm-slim
     ports: ["5173:5173"]
+    hostname: silentguard-local.ricardocampos.dev.br
     entrypoint: sh -c "npm i --no-update-notifier && npm run dev"
     environment:
-      VITE_BACKEND_SERVER: https://silentguard-local.ricardocampos.dev.br:8443
+      VITE_BACKEND_API: https://silentguard-local.ricardocampos.dev.br:8443
       VITE_BUILD: nightly
       NODE_ENV: development
     volumes: 
       - "./silent-app:/app"
+      - "./silent-app/certs:/app/certs"
     working_dir: /app
     healthcheck:
-      test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/5173'
+      test: timeout 10s bash -c 'true > /dev/tcp/silentguard-local.ricardocampos.dev.br/5173'
       interval: 1m30s
       timeout: 15s
       retries: 3
@@ -39,6 +41,8 @@ services:
       TARGET_ENV: development
       API_LOGGING_LEVEL: INFO
       SPRING_PROFILES_ACTIVE: dev
+      AUTH_DOMAIN: https://dev-tvghq7yotaw7mci1.us.auth0.com
+      API_IDENTIFIER: https://silentapi.ricardocampos.dev.br
     ports:
       - "8443:8443"
       - "5005:5005"
@@ -49,7 +53,7 @@ services:
       - "./silent-api:/app"
       - "./silent-api/certs:/app/certs"
     healthcheck:
-      test: curl -f -k https://silentguard-local.ricardocampos.dev.br:8443/actuator/health | grep '"status":"UP"'
+      test: curl -f -k https://localhost:8443/actuator/health | grep '"status":"UP"'
       interval: 1m30s
       timeout: 15s
       retries: 3

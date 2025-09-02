@@ -5,8 +5,8 @@ import fs from 'fs';
 import path from 'path';
 
 const isDev = process.env.NODE_ENV === 'development';
-const keyPath = path.resolve(__dirname, '../certs/silentguard-local.key');
-const certPath = path.resolve(__dirname, '../certs/silentguard-local.crt');
+const keyPath = path.resolve(__dirname, '/app/certs/silentguard-local.key');
+const certPath = path.resolve(__dirname, '/app/certs/silentguard-local.crt');
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -19,7 +19,7 @@ export default defineConfig({
         cert: fs.readFileSync(certPath),
       },
       host: 'silentguard-local.ricardocampos.dev.br',
-      allowedHosts: ['silentguard-local.ricardocampos.dev.br']
+      allowedHosts: ['localhost', 'silentguard-local.ricardocampos.dev.br']
     })
   },
   plugins: [
