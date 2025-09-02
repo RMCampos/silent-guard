@@ -8,7 +8,7 @@ vars:
 tasks:
   docker-build-app:
     desc: Build the silent-app prod-ready docker image, tagging it as candidate
-    cmd: docker build --build-arg VITE_BUILD="v999-$(date '+%Y-%m-%d-%H%M%S')" --build-arg SOURCE_PR="v999-123456789-$(date '+%Y-%m-%d-%H%M%S')" -f Dockerfile.dev -t ghcr.io/rmcampos/silent-guard/silent-app:candidate ./silent-app
+    cmd: docker build --build-arg VITE_BUILD="v999-$(date '+%Y-%m-%d-%H%M%S')" --build-arg SOURCE_PR="v999-123456789-$(date '+%Y-%m-%d-%H%M%S')" -f silent-app/Dockerfile.dev -t ghcr.io/rmcampos/silent-guard/silent-app:candidate ./silent-app
 
   docker-build-api:
     desc: Build the silent-api prod-ready docker image, tagging it as candidate
@@ -44,7 +44,7 @@ tasks:
 
   dev-run-api:
     desc: Get the silent-api up and running locally inside docker ready for development
-    cmd: docker compose -f docker-compose.dev.yml up -d tasknote-api
+    cmd: docker compose -f docker-compose.dev.yml up -d silent-api
 
   dev-run-db:
     desc: Get the silent-db up and running locally inside docker ready for development
