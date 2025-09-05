@@ -1,5 +1,6 @@
 package br.dev.ricardocampos.silentguardapi.service;
 
+import br.dev.ricardocampos.silentguardapi.config.AppConfig;
 import br.dev.ricardocampos.silentguardapi.entity.MessageEntity;
 import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
@@ -19,6 +20,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +39,9 @@ public class PersistentReminderService {
 
   private final UserRepository userRepository;
 
-  private static final Integer WINDOW_CHECKIN_INTERVAL = 24;
+  private final AppConfig appConfig;
+
+  private final Environment environment;
 
   private static final Map<String, ScheduledFuture<?>> activeTasks = new ConcurrentHashMap<>();
 
@@ -72,16 +77,39 @@ public class PersistentReminderService {
   public void scheduleCheckingMessage(String userEmail, MessageEntity message) {
     Duration initialDelay = Duration.between(LocalDateTime.now(), message.getNextReminderDue());
     Duration interval = Duration.ofDays(message.getSpanDays());
+    String suffix = "days";
+    int spanPeriod = message.getSpanDays();
 
     if (initialDelay.isNegative()) {
       initialDelay = Duration.ZERO;
     }
 
+    if (environment.matchesProfiles("dev") && appConfig.getDevTimeToTrigger() != null) {
+      log.info("Development environment detected, using dev-time-to-trigger for scheduling");
+      String devTime = appConfig.getDevTimeToTrigger();
+      if (devTime.endsWith("m")) {
+        spanPeriod = Integer.parseInt(devTime.replace("m", ""));
+        suffix = "minutes";
+        initialDelay = Duration.ofMinutes((long) spanPeriod);
+        interval = Duration.ofMinutes((long) spanPeriod);
+      } else if (devTime.endsWith("h")) {
+        spanPeriod = Integer.parseInt(devTime.replace("h", ""));
+        suffix = "hours";
+        initialDelay = Duration.ofHours((long) spanPeriod);
+        interval = Duration.ofHours((long) spanPeriod);
+      } else {
+        log.warn(
+            "Invalid dev-time-to-trigger format: {}. Expected format is number followed by 'm' or 'h'.",
+            devTime);
+      }
+    }
+
     log.info(
-        "Scheduling check-in message {} to be sent in {}, then repeat after {} days",
+        "Scheduling check-in message {} to be sent in {}, then repeat after {} {}",
         message.getId(),
         FormatUtil.formatDuration(initialDelay),
-        message.getSpanDays());
+        spanPeriod,
+        suffix);
 
     ScheduledFuture<?> future =
         taskScheduler.scheduleWithFixedDelay(
@@ -96,7 +124,8 @@ public class PersistentReminderService {
     try {
       log.info("Handling check-in message schedule for message id {}", message.getId());
       List<String> recipients = Arrays.asList(new String[] {userEmail});
-      mailgunEmailService.sendCheckInRequest(recipients, message.getReminderUuid().toString());
+      Duration timeToRespond = Duration.ofMinutes(getWindowCheckingInterval());
+      mailgunEmailService.sendCheckInRequest(recipients, message.getReminderUuid().toString(), timeToRespond);
 
       messageRepository
           .findById(message.getId())
@@ -125,7 +154,7 @@ public class PersistentReminderService {
   public void scheduleContentMessage(MessageEntity message) {
     Duration initialDelay =
         Duration.between(
-            LocalDateTime.now(), LocalDateTime.now().plusHours(WINDOW_CHECKIN_INTERVAL));
+            LocalDateTime.now(), LocalDateTime.now().plusMinutes(getWindowCheckingInterval()));
 
     log.info(
         "Scheduling content message id {} to be sent in {}, if not cancelled",
@@ -152,7 +181,12 @@ public class PersistentReminderService {
 
       Duration timePast = Duration.between(LocalDateTime.now(), lastChecking);
 
-      if (timePast.toHours() < WINDOW_CHECKIN_INTERVAL) {
+      log.info(
+          "Time since last check-in for user {} is {}",
+          message.getUserId(),
+          FormatUtil.formatDuration(timePast));
+
+      if (timePast.toMinutes() < getWindowCheckingInterval()) {
         log.info("Skipping content message. User {} did the check in", message.getUserId());
         return;
       }
@@ -213,5 +247,20 @@ public class PersistentReminderService {
 
   private String createScheduleId(Long messageId, boolean isContent) {
     return messageId.toString() + (isContent ? "-check-in" : "-content");
+  }
+
+  private long getWindowCheckingInterval() {
+    String interval = appConfig.getWindowCheckingInterval();
+    final long defaultInterval = 24 * 60;
+    if (Objects.isNull(interval) || interval.isBlank()) {
+      return defaultInterval;
+    }
+    else if (interval.endsWith("h")) {
+      return Long.parseLong(interval.replace("h", "")) * 60;
+    }
+    else if (interval.endsWith("m")) {
+      return Long.parseLong(interval.replace("m", ""));
+    }
+    return defaultInterval;
   }
 }

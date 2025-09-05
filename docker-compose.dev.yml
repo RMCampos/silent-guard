@@ -43,6 +43,8 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       AUTH_DOMAIN: https://dev-tvghq7yotaw7mci1.us.auth0.com
       API_IDENTIFIER: https://silentapi.ricardocampos.dev.br
+      MAILGUN_APIKEY: ${MAILGUN_APIKEY}
+      WINDOW_CHECKING_INTERVAL: 5m
     ports:
       - "8443:8443"
       - "5005:5005"
