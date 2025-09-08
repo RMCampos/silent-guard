@@ -5,7 +5,10 @@ import br.dev.ricardocampos.silentguardapi.exception.MailServiceException;
 import br.dev.ricardocampos.silentguardapi.template.MailgunTemplate;
 import br.dev.ricardocampos.silentguardapi.template.MailgunTemplateCheckIn;
 import br.dev.ricardocampos.silentguardapi.template.MailgunTemplateHtml;
+import br.dev.ricardocampos.silentguardapi.util.FormatUtil;
+
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -52,7 +55,7 @@ public class MailgunEmailService {
    * @param recipients the list of email addresses to send the check-in request to
    * @param confirmationId the confirmation ID to include in the check-in link
    */
-  public void sendCheckInRequest(List<String> recipients, String confirmationId) {
+  public void sendCheckInRequest(List<String> recipients, String confirmationId, Duration hoursToRespond) {
     log.info("Sending check-in message");
 
     String to = recipients.getFirst();
@@ -61,6 +64,7 @@ public class MailgunEmailService {
 
     MailgunTemplateCheckIn checkInTemplate = new MailgunTemplateCheckIn();
     checkInTemplate.setCheckInLink(String.format(link, confirmationId));
+    checkInTemplate.setTimeToRespond(FormatUtil.formatDuration(hoursToRespond));
     List<String> recipientsCarbonCopy = getRecipientsCarbonCopy(recipients);
     if (!recipientsCarbonCopy.isEmpty()) {
       checkInTemplate.setCarbonCopy(String.join(",", recipientsCarbonCopy));
@@ -158,7 +162,7 @@ public class MailgunEmailService {
   private String getBaseUrl() {
     if ("development".equals(appConfig.getTargetEnv())
         || Objects.isNull(appConfig.getTargetEnv())) {
-      return "http://localhost:5173";
+      return "https://silentguard-local.ricardocampos.dev.br:5173";
     }
     return String.format("https://%s%s", "silentguard.", appConfig.getMailgunDomain() + "/");
   }

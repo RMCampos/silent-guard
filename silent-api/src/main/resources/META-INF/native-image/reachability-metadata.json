@@ -1,0 +1,162 @@
+{
+  "reflection": [
+    {
+      "type": "io.jsonwebtoken.Claims"
+    },
+    {
+      "type": "io.jsonwebtoken.Header"
+    },
+    {
+      "type": "io.jsonwebtoken.Identifiable"
+    },
+    {
+      "type": "io.jsonwebtoken.JwsHeader"
+    },
+    {
+      "type": "io.jsonwebtoken.ProtectedHeader"
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultClaims",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultHeader",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultJwsHeader",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.DefaultProtectedHeader",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "io.jsonwebtoken.impl.ParameterMap",
+      "allDeclaredFields": true
+    },
+    {
+      "type": "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.lang.Nameable"
+    },
+    {
+      "type": "io.jsonwebtoken.impl.lang.ParameterReadable"
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.StandardKeyAlgorithms",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.StandardKeyOperations",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "io.jsonwebtoken.jackson.io.JacksonDeserializer"
+    },
+    {
+      "type": "io.jsonwebtoken.jackson.io.JacksonSerializer"
+    },
+    {
+      "type": "io.jsonwebtoken.security.X509Accessor"
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/services/io.jsonwebtoken.io.Deserializer"
+    },
+    {
+      "glob": "META-INF/services/io.jsonwebtoken.io.Serializer"
+    }
+  ]
+}
+

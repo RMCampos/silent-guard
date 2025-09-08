@@ -29,6 +29,10 @@ public class MailgunTemplateCheckIn implements MailgunTemplate {
     props.put("CHECK_IN_LINK", checkInLink);
   }
 
+  public void setTimeToRespond(String timeToRespond) {
+    props.put("TIME_TO_RESPOND", timeToRespond);
+  }
+
   /**
    * Returns the name of the template.
    *
