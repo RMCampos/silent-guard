@@ -43,6 +43,9 @@ tasks:
     cmd: docker compose -f docker-compose.dev.yml up -d silent-app
 
   dev-run-api:
+    preconditions:
+      - sh: test -n "$MAILGUN_APIKEY"
+        msg: 'MAILGUN_APIKEY environment variable is required'
     desc: Get the silent-api up and running locally inside docker ready for development
     cmd: docker compose -f docker-compose.dev.yml up -d silent-api
 
@@ -51,6 +54,9 @@ tasks:
     cmd: docker compose -f docker-compose.dev.yml up -d silent-db
 
   dev-run:
+    preconditions:
+      - sh: test -n "$MAILGUN_APIKEY"
+        msg: 'MAILGUN_APIKEY environment variable is required'
     desc: Get both silent-app and silent-api up and running locally inside docker ready for development
     cmd: docker compose -f docker-compose.dev.yml up -d
 
