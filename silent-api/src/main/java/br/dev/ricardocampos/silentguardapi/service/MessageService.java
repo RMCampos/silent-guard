@@ -1,14 +1,17 @@
 package br.dev.ricardocampos.silentguardapi.service;
 
 import br.dev.ricardocampos.silentguardapi.auth.BearerTokenHolder;
+import br.dev.ricardocampos.silentguardapi.dto.ConfirmationResponseDto;
 import br.dev.ricardocampos.silentguardapi.dto.MessageDto;
 import br.dev.ricardocampos.silentguardapi.dto.UserInfoDto;
 import br.dev.ricardocampos.silentguardapi.entity.MessageEntity;
 import br.dev.ricardocampos.silentguardapi.entity.UserEntity;
+import br.dev.ricardocampos.silentguardapi.enums.TypeToTriggerEnum;
 import br.dev.ricardocampos.silentguardapi.exception.InvalidUserException;
 import br.dev.ricardocampos.silentguardapi.exception.MessageNotFoundException;
 import br.dev.ricardocampos.silentguardapi.repository.MessageRepository;
 import br.dev.ricardocampos.silentguardapi.repository.UserRepository;
+import br.dev.ricardocampos.silentguardapi.util.FormatUtil;
 import br.dev.ricardocampos.silentguardapi.util.UuidUtil;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -76,10 +79,17 @@ public class MessageService {
     message.setSubject(messageDto.subject());
     message.setTargets(targets);
     message.setContent(messageDto.content());
-    message.setSpanDays(messageDto.daysToTrigger());
+    message.setNumberToTrigger(messageDto.numberToTrigger());
+    message.setTypeToTrigger(messageDto.typeToTrigger().name());
     message.setCreatedAt(LocalDateTime.now());
     message.setLastReminderSent(null);
-    message.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.daysToTrigger()));
+    if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.DAYS)) {
+      message.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.numberToTrigger()));
+    } else if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.HOURS)) {
+      message.setNextReminderDue(LocalDateTime.now().plusHours(messageDto.numberToTrigger()));
+    } else if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.MINUTES)) {
+      message.setNextReminderDue(LocalDateTime.now().plusMinutes(messageDto.numberToTrigger()));
+    }
     message.setReminderUuid(new UuidUtil().generateRecipientUuid(targets));
 
     messageRepository.save(message);
@@ -116,11 +126,19 @@ public class MessageService {
     messageFromDb.setSubject(messageDto.subject());
     messageFromDb.setTargets(targets);
     messageFromDb.setContent(messageDto.content());
-    messageFromDb.setSpanDays(messageDto.daysToTrigger());
+    messageFromDb.setNumberToTrigger(messageDto.numberToTrigger());
+    messageFromDb.setTypeToTrigger(messageDto.typeToTrigger().name());
     messageFromDb.setUpdatedAt(LocalDateTime.now());
     messageFromDb.setDisabledAt(null);
     messageFromDb.setLastReminderSent(null);
-    messageFromDb.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.daysToTrigger()));
+    if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.DAYS)) {
+      messageFromDb.setNextReminderDue(LocalDateTime.now().plusDays(messageDto.numberToTrigger()));
+    } else if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.HOURS)) {
+      messageFromDb.setNextReminderDue(LocalDateTime.now().plusHours(messageDto.numberToTrigger()));
+    } else if (messageDto.typeToTrigger().equals(TypeToTriggerEnum.MINUTES)) {
+      messageFromDb.setNextReminderDue(
+          LocalDateTime.now().plusMinutes(messageDto.numberToTrigger()));
+    }
     messageFromDb.setReminderUuid(new UuidUtil().generateRecipientUuid(targets));
 
     if (!messageDto.active()) {
@@ -168,14 +186,14 @@ public class MessageService {
    * @param confirmation the confirmation ID of the message to register the check-in for
    */
   @Transactional
-  public void registerUserCheckIn(String confirmation) {
+  public ConfirmationResponseDto registerUserCheckIn(String confirmation) {
     try {
       log.info("Registering user check-in for confirmation id {}", confirmation);
       Optional<MessageEntity> messageOption =
           messageRepository.findByReminderUuid(UUID.fromString(confirmation));
       if (messageOption.isEmpty()) {
         log.info("Message not found for the confirmation id {}", confirmation);
-        return;
+        return new ConfirmationResponseDto(null);
       }
 
       MessageEntity message = messageOption.get();
@@ -185,10 +203,22 @@ public class MessageService {
       messageRepository.save(message);
 
       persistentReminderService.cancelExistingTask(message.getId(), true);
-      log.info("Content message successfully canceled upon check in.");
+
+      LocalDateTime nextDue = null;
+      if (TypeToTriggerEnum.DAYS.name().equals(message.getTypeToTrigger())) {
+        nextDue = message.getLastCheckIn().plusDays(message.getNumberToTrigger());
+      } else if (TypeToTriggerEnum.HOURS.name().equals(message.getTypeToTrigger())) {
+        nextDue = message.getLastCheckIn().plusHours(message.getNumberToTrigger());
+      } else if (TypeToTriggerEnum.MINUTES.name().equals(message.getTypeToTrigger())) {
+        nextDue = message.getLastCheckIn().plusMinutes(message.getNumberToTrigger());
+      }
+      String nextCheckIn = FormatUtil.formatDateTime(nextDue);
+      log.info("Content message successfully canceled upon check in. Next due at {}", nextCheckIn);
+      return new ConfirmationResponseDto(nextCheckIn);
     } catch (Exception e) {
       log.error("Error when registering user check in {}", e.getMessage());
     }
+    return new ConfirmationResponseDto(null);
   }
 
   private UserEntity getUserEntity() {

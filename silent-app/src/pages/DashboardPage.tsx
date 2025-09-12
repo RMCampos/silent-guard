@@ -13,7 +13,7 @@ type Props = {
   setPageChanged: () => void;
 };
 
-const emptyMessage: Message = { id: 0, subject: '', content: '', daysToTrigger: 30, recipients: [], active: true };
+const emptyMessage: Message = { id: 0, subject: '', content: '', numberToTrigger: 30, typeToTrigger: 'DAYS', recipients: [], active: true };
 
 /**
  * DashboardPage component displays the user's dashboard with options to manage messages.
@@ -157,7 +157,7 @@ const DashboardPage: React.FC<Props> = (props) => {
    */
   const createFooterMessage = (message: Message): string => {
     const parts: string[] = [];
-    parts.push(`Trigger every ${message.daysToTrigger} day(s); `);
+    parts.push(`Trigger every ${message.numberToTrigger} ${message.typeToTrigger}; `);
     if (message.lastCheckIn) {
       parts.push(`Last check-in: ${message.lastCheckIn}; `);
     }
@@ -258,16 +258,25 @@ const DashboardPage: React.FC<Props> = (props) => {
             </div>
             <div className="mt-4 flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-slate-700">Trigger every (days):</label>
+                <label className="text-sm font-medium text-slate-700">Trigger every:</label>
                 <input
                   type="number"
                   placeholder="0"
                   min="1"
                   max="365"
-                  value={newMessage.daysToTrigger}
-                  onChange={(e) => setNewMessage({ ...newMessage, daysToTrigger: parseInt(e.target.value) })}
+                  value={newMessage.numberToTrigger}
+                  onChange={(e) => setNewMessage({ ...newMessage, numberToTrigger: parseInt(e.target.value) })}
                   className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                 />
+                <select
+                  value={newMessage.typeToTrigger}
+                  onChange={(e) => setNewMessage({ ...newMessage, typeToTrigger: e.target.value as 'DAYS' | 'HOURS' | 'MINUTES' })}
+                  className="w-30 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                >
+                  <option value="DAYS">Days</option>
+                  <option value="HOURS">Hours</option>
+                  <option value="MINUTES">Minutes</option>
+                </select>
               </div>
               <button
                 onClick={handleSaveMessage}
@@ -311,10 +320,19 @@ const DashboardPage: React.FC<Props> = (props) => {
                           type="number"
                           min="1"
                           max="365"
-                          value={editingMessage.daysToTrigger}
-                          onChange={(e) => setEditingMessage({ ...editingMessage, daysToTrigger: parseInt(e.target.value) })}
+                          value={editingMessage.numberToTrigger}
+                          onChange={(e) => setEditingMessage({ ...editingMessage, numberToTrigger: parseInt(e.target.value) })}
                           className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                         />
+                        <select
+                          value={editingMessage.typeToTrigger}
+                          onChange={(e) => setEditingMessage({ ...editingMessage, typeToTrigger: e.target.value as 'DAYS' | 'HOURS' | 'MINUTES' })}
+                          className="w-30 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                        >
+                          <option value="DAYS">Days</option>
+                          <option value="HOURS">Hours</option>
+                          <option value="MINUTES">Minutes</option>
+                        </select>
                       </div>
                       <div className="flex space-x-2">
                         <button

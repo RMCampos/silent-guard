@@ -12,6 +12,7 @@ import Footer from "../components/Footer.tsx";
  */
 const LandingPage: React.FC = () => {
   const [confirmationDone, setConfirmationDone] = useState<boolean>(false);
+  const [nextConfirmation, setNextConfirmation] = useState<string | null>(null);
   const { loginWithRedirect } = useAuth0();
 
   /**
@@ -40,7 +41,8 @@ const LandingPage: React.FC = () => {
 
     const payload = { confirmation: confirmation };
     try {
-      await checkInConfirmation(payload);
+      const response = await checkInConfirmation(payload);
+      setNextConfirmation(response.nextCheckIn || null);
       setConfirmationDone(true);
     }
     catch (e) {
@@ -96,15 +98,7 @@ const LandingPage: React.FC = () => {
                   <span className="text-blue-400 font-semibold">Next check-in required by:</span>
                   <br />
                   <span className="text-white text-base font-medium">
-                    {/* You can replace this with dynamic date */}
-                    {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {nextConfirmation}
                   </span>
                 </p>
               </div>
