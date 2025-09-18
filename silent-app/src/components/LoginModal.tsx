@@ -23,14 +23,14 @@ const LoginModal: React.FC<Props> = (props) => {
   return props.show
     ? (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <div className="bg-slate-800 rounded-xl max-w-md w-full p-6 border border-slate-700">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-white">
               {loginMode === 'login' ? 'Login' : 'Reset Password'}
             </h2>
             <button
               onClick={() => props.onClose()}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-slate-400 hover:text-slate-300"
             >
               <X className="w-6 h-6" />
             </button>
@@ -43,7 +43,7 @@ const LoginModal: React.FC<Props> = (props) => {
                 placeholder="Email"
                 value={userEmail}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="relative">
                 <input
@@ -51,12 +51,12 @@ const LoginModal: React.FC<Props> = (props) => {
                   placeholder="Password"
                   value={userPassword}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                  className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-300"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -81,7 +81,7 @@ const LoginModal: React.FC<Props> = (props) => {
                 placeholder="Enter your email"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
                 onClick={() => console.log('change me')}

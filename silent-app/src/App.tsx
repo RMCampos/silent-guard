@@ -28,10 +28,10 @@ const App: React.FC = (): React.ReactNode => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-slate-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-slate-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto"></div>
+          <p className="mt-2 text-slate-300">Loading...</p>
         </div>
       </div>
     );

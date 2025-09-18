@@ -194,25 +194,25 @@ const DashboardPage: React.FC<Props> = (props) => {
 
   return (
     <Fragment>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-900 flex flex-col">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
-          <div className="flex justify-between items-center">
+        <header className="bg-slate-800 shadow-sm border-b border-slate-700 px-6 py-4">
+          <div className="max-w-8xl mx-auto flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Shield className="w-8 h-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-slate-900">Silent Guard</h1>
+              <h1 className="text-2xl font-bold text-white">Silent Guard</h1>
             </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowAccountModal(true)}
-                className="flex items-center space-x-2 text-slate-700 hover:text-slate-900"
+                className="flex items-center space-x-2 text-slate-300 hover:text-white"
               >
                 <User className="w-5 h-5" />
                 <span>Account</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 text-slate-700 hover:text-slate-900"
+                className="flex items-center space-x-2 text-slate-300 hover:text-white"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>
@@ -222,43 +222,43 @@ const DashboardPage: React.FC<Props> = (props) => {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-6 py-8">
+        <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Your Messages</h2>
-            <p className="text-slate-600">Manage your dead man's switch messages and monitoring settings.</p>
+            <h2 className="text-3xl font-bold text-white mb-2">Your Messages</h2>
+            <p className="text-slate-300">Manage your dead man's switch messages and monitoring settings.</p>
           </div>
 
           {/* New Message Form */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">Create new scheduled message</h3>
-            <div className="grid md:grid-cols-2 gap-4">
+          <div className="bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-8 mb-8">
+            <h3 className="text-xl font-semibold text-white mb-6">Create new scheduled message</h3>
+            <div className="grid lg:grid-cols-2 gap-6">
               <input
                 type="text"
                 placeholder="Message subject"
                 value={newMessage.subject}
                 onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                className="px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
               />
               <input
                 type="email"
                 placeholder="Recipient email (comma for multiple)"
                 value={newMessage.recipients}
                 onChange={(e) => setNewMessage({ ...newMessage, recipients: e.target.value.split(',') })}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                className="px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
               />
             </div>
-            <div className="mt-4">
+            <div className="mt-6">
               <textarea
                 placeholder="Message content"
-                rows={4}
+                rows={6}
                 value={newMessage.content}
                 onChange={(e) => setNewMessage({ ...newMessage, content: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
               />
             </div>
-            <div className="mt-4 flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-slate-700">Trigger every:</label>
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              <div className="flex items-center space-x-3">
+                <label className="text-base font-medium text-slate-300">Trigger every:</label>
                 <input
                   type="number"
                   placeholder="0"
@@ -266,12 +266,12 @@ const DashboardPage: React.FC<Props> = (props) => {
                   max="365"
                   value={newMessage.numberToTrigger}
                   onChange={(e) => setNewMessage({ ...newMessage, numberToTrigger: parseInt(e.target.value) })}
-                  className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                  className="w-24 px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
                 />
                 <select
                   value={newMessage.typeToTrigger}
                   onChange={(e) => setNewMessage({ ...newMessage, typeToTrigger: e.target.value as 'DAYS' | 'HOURS' | 'MINUTES' })}
-                  className="w-30 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                  className="px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-base"
                 >
                   <option value="DAYS">Days</option>
                   <option value="HOURS">Hours</option>
@@ -281,53 +281,53 @@ const DashboardPage: React.FC<Props> = (props) => {
               <button
                 onClick={handleSaveMessage}
                 disabled={!newMessage.subject || !newMessage.content || !newMessage.recipients}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg transition-colors text-base font-medium"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 <span>Add Message</span>
               </button>
             </div>
           </div>
 
           {/* Messages List */}
-          <div className="grid gap-6">
+          <div className="grid gap-8">
             {messages.map((message) => (
-              <div key={message.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <div key={message.id} className="bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-8">
                 {editingMessage?.id === message.id ? (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <input
                       type="text"
                       value={editingMessage.subject}
                       onChange={(e) => setEditingMessage({ ...editingMessage, subject: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                      className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
                     />
                     <input
                       type="email"
                       value={editingMessage.recipients.join(', ')}
                       onChange={(e) => setEditingMessage({ ...editingMessage, recipients: e.target.value.split(',') })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                      className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
                     />
                     <textarea
-                      rows={4}
+                      rows={6}
                       value={editingMessage.content}
                       onChange={(e) => setEditingMessage({ ...editingMessage, content: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                      className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400 text-base"
                     />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-slate-700">Days:</label>
+                        <label className="text-sm font-medium text-slate-300">Days:</label>
                         <input
                           type="number"
                           min="1"
                           max="365"
                           value={editingMessage.numberToTrigger}
                           onChange={(e) => setEditingMessage({ ...editingMessage, numberToTrigger: parseInt(e.target.value) })}
-                          className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                          className="w-20 px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                         />
                         <select
                           value={editingMessage.typeToTrigger}
                           onChange={(e) => setEditingMessage({ ...editingMessage, typeToTrigger: e.target.value as 'DAYS' | 'HOURS' | 'MINUTES' })}
-                          className="w-30 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
+                          className="w-30 px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-slate-400"
                         >
                           <option value="DAYS">Days</option>
                           <option value="HOURS">Hours</option>
@@ -337,14 +337,14 @@ const DashboardPage: React.FC<Props> = (props) => {
                       <div className="flex space-x-2">
                         <button
                           onClick={handleSaveMessage}
-                          className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors"
+                          className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-base font-medium"
                         >
                           <Save className="w-4 h-4" />
                           <span>Save</span>
                         </button>
                         <button
                           onClick={() => setEditingMessage(null)}
-                          className="flex items-center space-x-1 bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg transition-colors"
+                          className="flex items-center space-x-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors text-base font-medium"
                         >
                           <X className="w-4 h-4" />
                           <span>Cancel</span>
@@ -356,44 +356,44 @@ const DashboardPage: React.FC<Props> = (props) => {
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-semibold text-slate-900">{message.subject}</h3>
-                        <p className="text-sm text-slate-600">To: {message.recipients.join(', ')}</p>
+                        <h3 className="text-2xl font-semibold text-white">{message.subject}</h3>
+                        <p className="text-base text-slate-300">To: {message.recipients.join(', ')}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${message.active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-slate-100 text-slate-800'
+                        <span className={`px-4 py-2 rounded-full text-sm font-medium ${message.active
+                          ? 'bg-green-600 text-white'
+                          : 'bg-slate-600 text-white'
                           }`}>
                           {message.active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </div>
-                    <p className="text-slate-700 mb-4">{message.content}</p>
+                    <p className="text-base text-slate-300 mb-6 leading-relaxed">{message.content}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-slate-600">
+                      <span className="text-base text-slate-300">
                         {createFooterMessage(message)}
 
                       </span>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => toggleMessageStatus(message.id)}
-                          className={`px-3 py-1 rounded-lg text-sm transition-colors ${message.active
-                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${message.active
+                            ? 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-green-600 text-white hover:bg-green-700'
                             }`}
                         >
                           {message.active ? 'Deactivate' : 'Activate'}
                         </button>
                         <button
                           onClick={() => setEditingMessage(message)}
-                          className="flex items-center space-x-1 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-lg transition-colors"
+                          className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-base font-medium"
                         >
                           <Edit className="w-4 h-4" />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDeleteMessage(message.id)}
-                          className="flex items-center space-x-1 bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-lg transition-colors"
+                          className="flex items-center space-x-2 bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg transition-colors text-base font-medium"
                         >
                           <Trash2 className="w-4 h-4" />
                           <span>Delete</span>
