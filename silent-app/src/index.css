@@ -2,9 +2,10 @@
 
 /* Apply dark mode globally */
 html {
-  @apply dark;
+  color-scheme: dark;
 }
 
-body {
+html.dark,
+html {
   @apply bg-slate-900 text-white;
 }

@@ -10,6 +10,9 @@ import { TokenProvider } from './context/TokenContext.tsx';
 // for a full list of the available properties on the provider
 const config = getConfig();
 
+// Ensure dark mode is applied
+document.documentElement.classList.add('dark');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Auth0Provider
