@@ -1,1 +1,11 @@
 @import 'tailwindcss';
+
+/* Apply dark mode globally */
+html {
+  color-scheme: dark;
+}
+
+html.dark,
+html {
+  @apply bg-slate-900 text-white;
+}

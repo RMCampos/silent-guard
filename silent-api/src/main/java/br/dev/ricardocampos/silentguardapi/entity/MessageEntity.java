@@ -27,8 +27,11 @@ public class MessageEntity {
   @Column(name = "user_id", nullable = false)
   private Long userId;
 
-  @Column(name = "span_days", nullable = false)
-  private Integer spanDays;
+  @Column(name = "number_to_trigger", nullable = false)
+  private Integer numberToTrigger;
+
+  @Column(name = "type_to_trigger", nullable = false)
+  private String typeToTrigger;
 
   @Column(nullable = false, length = 300)
   private String subject;

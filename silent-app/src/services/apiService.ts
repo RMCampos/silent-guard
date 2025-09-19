@@ -191,8 +191,9 @@ export const checkInConfirmation = async (payload: { confirmation: string }) => 
     headers: getHeaders()
   });
 
-  if (response.status === 204) {
-    return;
+  if (response.ok && response.status === 200) {
+    const json = await response.json();
+    return json;
   }
 
   const contentType = response.headers.get('content-type');

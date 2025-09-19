@@ -1,5 +1,6 @@
 package br.dev.ricardocampos.silentguardapi.controller;
 
+import br.dev.ricardocampos.silentguardapi.dto.ConfirmationResponseDto;
 import br.dev.ricardocampos.silentguardapi.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,8 @@ public class ConfirmationController {
    * @return a ResponseEntity with no content if the check-in is successful
    */
   @PutMapping("/check-in/{confirmation}")
-  public ResponseEntity<Void> userCheckIn(@PathVariable("confirmation") String confirmation) {
-    messageService.registerUserCheckIn(confirmation);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<ConfirmationResponseDto> userCheckIn(@PathVariable("confirmation") String confirmation) {
+    ConfirmationResponseDto response = messageService.registerUserCheckIn(confirmation);
+    return ResponseEntity.ok(response);
   }
 }

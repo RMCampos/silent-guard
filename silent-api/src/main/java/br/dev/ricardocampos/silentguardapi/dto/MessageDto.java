@@ -1,6 +1,7 @@
 package br.dev.ricardocampos.silentguardapi.dto;
 
 import br.dev.ricardocampos.silentguardapi.entity.MessageEntity;
+import br.dev.ricardocampos.silentguardapi.enums.TypeToTriggerEnum;
 import br.dev.ricardocampos.silentguardapi.util.FormatUtil;
 import io.jsonwebtoken.lang.Arrays;
 import jakarta.validation.Valid;
@@ -31,7 +32,8 @@ public record MessageDto(
     @NotNull String subject,
     @NotEmpty(message = "At least one recipient is required") @Valid List<@Email String> recipients,
     @NotNull String content,
-    @NotNull Integer daysToTrigger,
+    @NotNull Integer numberToTrigger,
+    @NotNull TypeToTriggerEnum typeToTrigger,
     Boolean active,
     String lastCheckIn,
     String nextReminder) {
@@ -51,7 +53,8 @@ public record MessageDto(
         e.getSubject(),
         emails,
         e.getContent(),
-        e.getSpanDays(),
+        e.getNumberToTrigger(),
+        TypeToTriggerEnum.fromString(e.getTypeToTrigger()),
         active,
         FormatUtil.formatTimeAgo(e.getLastCheckIn()),
         FormatUtil.formatDuration(durationNext));

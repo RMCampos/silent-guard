@@ -2,7 +2,8 @@ export type Message = {
   id: number;
   subject: string;
   content: string;
-  daysToTrigger: number;
+  numberToTrigger: number;
+  typeToTrigger: 'DAYS' | 'HOURS' | 'MINUTES';
   recipients: string[];
   active: boolean;
   lastCheckIn?: string;

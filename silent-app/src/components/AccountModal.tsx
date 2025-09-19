@@ -24,12 +24,12 @@ const AccountModal: React.FC<Props> = (props): React.ReactNode => {
   return props.show
     ? (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <div className="bg-slate-800 rounded-xl max-w-md w-full p-6 border border-slate-700">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Account Settings</h2>
+            <h2 className="text-2xl font-bold text-white">Account Settings</h2>
             <button
               onClick={() => props.onClose()}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-slate-400 hover:text-slate-300"
             >
               <X className="w-6 h-6" />
             </button>
@@ -37,12 +37,12 @@ const AccountModal: React.FC<Props> = (props): React.ReactNode => {
 
           <form className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
               <input
                 type="email"
                 value={props.user?.email}
                 readOnly={true}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-600 bg-slate-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <button

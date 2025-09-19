@@ -1,0 +1,6 @@
+ALTER TABLE sg_messages
+  DROP COLUMN IF EXISTS span_days;
+
+ALTER TABLE sg_messages
+  ADD COLUMN IF NOT EXISTS number_to_trigger INT NOT NULL,
+  ADD COLUMN IF NOT EXISTS type_to_trigger VARCHAR(255) NOT NULL;

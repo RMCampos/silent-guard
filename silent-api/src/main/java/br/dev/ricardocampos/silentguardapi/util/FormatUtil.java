@@ -79,4 +79,17 @@ public class FormatUtil {
 
     return result.toString().trim();
   }
+
+  /**
+   * Formats a given LocalDateTime into a human-readable string representation.
+   * For example: Thursday, September 14, 2023 03:45 PM
+   * @param dateTime
+   * @return
+   */
+  public static String formatDateTime(LocalDateTime dateTime) {
+    if (Objects.isNull(dateTime)) {
+      return null;
+    }
+    return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy hh:mm a"));
+  }
 }

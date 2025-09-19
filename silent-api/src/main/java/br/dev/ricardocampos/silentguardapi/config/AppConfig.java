@@ -30,10 +30,4 @@ public class AppConfig {
 
   @Value("${br.dev.ricardocampos.silentguardapi.mailgun.sender-email}")
   private String mailgunSender;
-
-  @Value("${br.dev.ricardocampos.silentguardapi.window-checking-interval}")
-  private String windowCheckingInterval;
-
-  @Value("${br.dev.ricardocampos.silentguardapi.dev-time-to-trigger}")
-  private String devTimeToTrigger;
 }
